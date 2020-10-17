@@ -19,10 +19,18 @@ jobs:
         run: |
           echo "controller_id=${{ github.event.inputs.controller_id }}"
           echo "inputs=${{toJson(github.event.inputs)}}"
+  azure_login:
+    runs-on: ubuntu-18.04
+    steps:
+      - name: azure login
+        # https://github.com/marketplace/actions/azure-login
+        uses: azure/login@v1.1
+        with:
+          creds: ${{secrets.AZURE_CREDENTIALS}}
+      - name: List all resource groups in westeurope
+        run: |
+          az group list --query "[?location=='westeurope']"
 
-
-    # - AZURE LOGIN
-    #     - https://github.com/marketplace/actions/azure-login
 
 
 ###
