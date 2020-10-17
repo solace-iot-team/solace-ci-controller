@@ -18,7 +18,7 @@ jobs:
       - name: Print Payload
         run: |
           echo "controller_id=${{ github.event.inputs.controller_id }}"
-          echo "inputs="${{toJson(github.event.inputs)}}
+          echo "inputs=${{toJson(github.event.inputs)}}"
 
 
     # - AZURE LOGIN
