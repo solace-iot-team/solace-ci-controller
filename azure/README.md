@@ -1,5 +1,7 @@
 # Setup a Controller VM in Azure
 
+> :warning: **UNDER CONSTRUCTION**
+
 Uses ARM.
 
 ## Pre-Requisites
