@@ -108,23 +108,22 @@ jobs:
             host: ${{env.VM_PUBLIC_IP_ADDRESS}}
             username: ${{env.VM_USER_NAME}}
             password: ${{env.VM_PASSWORD}}
-
-    # - ARM Template:
-    #     - https://github.com/marketplace/actions/deploy-azure-resource-manager-arm-template
-    #     - capture output for SSH
-    #         - retrieve the file ==> I want to use it manually
-    #     - capture IP address
-
-    #       but then: how do I capture the state?
-    #       --> artefacts?
-
-
-# create the parameters file:
-  # .workflow-state
-    # create.parameters.json
-
-# call create.sh ./.workflow-state/create.parameters.json
-
+        - name: Copy bootstrap script     
+          # https://github.com/garygrossgarten/github-action-scp   
+          uses: garygrossgarten/github-action-scp@release
+          with:
+            local: ./azure/bootstrap.sh
+            remote: ~/bootstrap.sh
+            host: ${{env.VM_PUBLIC_IP_ADDRESS}}
+            username: ${{env.VM_USER_NAME}}
+            password: ${{env.VM_PASSWORD}}
+        - name: Execute bootstrap script
+          uses: garygrossgarten/github-action-ssh@release
+          with:
+            command: ~/bootstrap.sh
+            host: ${{env.VM_PUBLIC_IP_ADDRESS}}
+            username: ${{env.VM_USER_NAME}}
+            password: ${{env.VM_PASSWORD}}
 
 
 ###
