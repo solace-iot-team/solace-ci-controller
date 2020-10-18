@@ -131,7 +131,7 @@ wget -O solace-pubsub-evaluation-docker.tar.gz https://products.solace.com/downl
 
 - Azure CLI
 
-#### Create the service principal
+### Create the Service Principal
 ````bash
 export SP_NAME="{unique-service-principal-name}"
 
@@ -144,11 +144,16 @@ az ad sp create-for-rbac \
 ````
 
 
-#### Set the Secrets
+### Set the Secrets
 
 - **AZURE_CREDENTIALS**={the entire output from service principal command}
 
 - **AZURE_SUBSCRIPTION_ID**={subscription-id}
+
+### Run the Workflow
+
+Actions -> Standup Azure Controller -> Run workflow.
+
 ---
 The End.
 
