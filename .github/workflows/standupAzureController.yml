@@ -27,7 +27,11 @@ on:
           description: "the vm admin password"
           required: true
           default: "Controller-Solace-123"
-
+env:
+  PROJECT_PREFIX: '${{github.event.inputs.controller_id}}-solace-ci-controller'
+  AZURE_RESOURCE_GROUP: '${{github.event.inputs.controller_id}}-solace-ci-controller-rg'
+  AZURE_DEPLOY_ARM_TEMPLATE: ./azure/.workflows/azure-deploy.json
+  BOOTSTRAP_SH: ./azure/.workflows/bootstrap.sh
 jobs: 
   test:
     runs-on: ubuntu-18.04
@@ -40,9 +44,9 @@ jobs:
     outputs:
       publicIpAddress: ${{steps.azure_deploy.outputs.publicIPAddress}}
       resourceGroupName: ${{steps.azure_deploy.outputs.resourceGroupName}}
-    env:
-      PROJECT_PREFIX: '${{github.event.inputs.controller_id}}-solace-ci-controller'
-      AZURE_RESOURCE_GROUP: '${{github.event.inputs.controller_id}}-solace-ci-controller-rg'
+    # env:
+    #   PROJECT_PREFIX: '${{github.event.inputs.controller_id}}-solace-ci-controller'
+    #   AZURE_RESOURCE_GROUP: '${{github.event.inputs.controller_id}}-solace-ci-controller-rg'
     steps:
       - name: Checkout Repository
         uses: actions/checkout@master
@@ -78,7 +82,7 @@ jobs:
         with:
           subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           resourceGroupName: ${{env.AZURE_RESOURCE_GROUP}}
-          template: ./azure/azure-deploy.json
+          template: ${{AZURE_DEPLOY_ARM_TEMPLATE}}
           parameters: id=${{github.event.inputs.controller_id}} zone=${{github.event.inputs.zone}} vm_admin_username=${{github.event.inputs.vm_admin_username}} vm_admin_password=${{github.event.inputs.vm_admin_password}}
       - name: "TEST: show the deploy output"
         run: |
@@ -91,28 +95,19 @@ jobs:
         VM_PUBLIC_IP_ADDRESS: ${{needs.create_vm.outputs.publicIpAddress}}
         VM_USER_NAME: ${{github.event.inputs.vm_admin_username}}   
         VM_PASSWORD: ${{github.event.inputs.vm_admin_password}}   
-      steps:        
+      steps:
+        - name: Checkout Repository
+          uses: actions/checkout@master
         - name: "TEST: show the create_vm output"          
           run: |
             echo "outputs from create_vm:"
             echo "publicIpAddress = ${VM_PUBLIC_IP_ADDRESS}"
             echo "resourceGroupName = ${{needs.create_vm.outputs.resourceGroupName}}"
-        - name: "TEST: pwd via ssh"
-          # https://github.com/marketplace/actions/run-ssh-command
-          uses: garygrossgarten/github-action-ssh@release
-          with:
-            command: |
-              pwd
-              ls -la
-              echo "we are in!"
-            host: ${{env.VM_PUBLIC_IP_ADDRESS}}
-            username: ${{env.VM_USER_NAME}}
-            password: ${{env.VM_PASSWORD}}
         - name: Copy bootstrap script     
           # https://github.com/garygrossgarten/github-action-scp   
           uses: garygrossgarten/github-action-scp@release
           with:
-            local: ./azure/bootstrap.sh
+            local: ${{env.BOOTSTRAP_SH}}
             remote: ~/bootstrap.sh
             host: ${{env.VM_PUBLIC_IP_ADDRESS}}
             username: ${{env.VM_USER_NAME}}
