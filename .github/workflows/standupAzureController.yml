@@ -38,6 +38,7 @@ jobs:
   deploy:
     runs-on: ubuntu-18.04
     env:
+      PROJECT_PREFIX: '${{github.event.inputs.controller_id}}-solace-ci-controller'
       AZURE_RESOURCE_GROUP: '${{github.event.inputs.controller_id}}-solace-ci-controller-rg'
     steps:
       - name: Checkout Repository
@@ -52,7 +53,7 @@ jobs:
           echo "GITHUB_REF=$GITHUB_REF"
           echo "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}"
           echo "github.token=${{ github.token }}"  
-      - name: azure login
+      - name: Azure Login
         # https://github.com/marketplace/actions/azure-login
         uses: azure/login@v1.1
         with:
@@ -60,7 +61,14 @@ jobs:
       - name: "TEST: List all resource groups in specified location"
         run: |
           az group list --query "[?location=='${{github.event.inputs.azure_location}}']"
-      - name: Run ARM deploy
+      - name: Create Resource Group    
+        run: |
+          az group create \
+            --name ${AZURE_RESOURCE_GROUP} \
+            --location ${{github.event.inputs.azure_location}} \
+            --tags project=${PROJECT_PREFIX} \
+            --verbose
+      - name: Run ARM Deploy
         id: azure_deploy
         uses: azure/arm-deploy@v1
         with:
