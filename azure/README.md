@@ -36,7 +36,9 @@ az ad sp create-for-rbac \
 
 - AZURE_CREDENTIALS={the entire output from the command above}
 
+### Secret: Azure Subscription Id
 
+- AZURE_SUBSCRIPTION_ID={subscription-id}
 ---
 The End.
 

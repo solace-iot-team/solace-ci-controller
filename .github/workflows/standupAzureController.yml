@@ -11,27 +11,37 @@ on:
           description: "the unique controller id"
           required: true
           default: t1
+      azure_location:
+          description: "azure location / region"
+          required: true
+          default: "westeurope"
+      zone:
+          description: "the availability zone"
+          required: true
+          default: "1"
+      vm_admin_username: 
+          description: "the vm admin username"
+          required: true
+          default: "controller"
+      vm_admin_password:
+          description: "the vm admin password"
+          required: true
+          default: "Controller-Solace-123"
+
 jobs: 
   test:
     runs-on: ubuntu-18.04
     steps:
-      - name: Print Payload
+      - name: Print Inputs
         run: |
-          echo "controller_id=${{ github.event.inputs.controller_id }}"
           echo "inputs=${{toJson(github.event.inputs)}}"
-  azure_login:
+  deploy:
     runs-on: ubuntu-18.04
+    env:
+      AZURE_RESOURCE_GROUP: '${{github.event.inputs.controller_id}}-solace-ci-controller-rg'
     steps:
-      - name: azure login
-        # https://github.com/marketplace/actions/azure-login
-        uses: azure/login@v1.1
-        with:
-          creds: ${{secrets.AZURE_CREDENTIALS}}
-      - name: "TEST: List all resource groups in westeurope"
-        run: |
-          az group list --query "[?location=='westeurope']"
       - name: Checkout Repository
-        uses: actions/checkout@v1
+        uses: actions/checkout@master
       - name: "TESTS: List Files after checkout"
         run: |
           pwd
@@ -42,6 +52,26 @@ jobs:
           echo "GITHUB_REF=$GITHUB_REF"
           echo "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}"
           echo "github.token=${{ github.token }}"  
+      - name: azure login
+        # https://github.com/marketplace/actions/azure-login
+        uses: azure/login@v1.1
+        with:
+          creds: ${{secrets.AZURE_CREDENTIALS}}
+      - name: "TEST: List all resource groups in specified location"
+        run: |
+          az group list --query "[?location=='${{github.event.inputs.azure_location}}']"
+      - name: Run ARM deploy
+        id: azure_deploy
+        uses: azure/arm-deploy@v1
+        with:
+          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          resourceGroupName: ${{ AZURE_RESOURCE_GROUP }}
+          template: ./azure/azuredeploy.json
+          parameters: id=${{github.event.inputs.controller_id}} azLocation=${{github.event.inputs.azure_location}} zone=$${{github.event.inputs.zone}} vm_admin_username=${{github.event.inputs.vm_admin_username}} vm_admin_password=${{github.event.inputs.vm_admin_password}}
+          # rgName=demoResourceGroup rgLocation=centralus
+      - name: "TEST: show the deploy output"
+        run: |
+          echo "outputs=${{toJson(github.azure_deploy.outputs)}}"
 
 
     # - ARM Template:
