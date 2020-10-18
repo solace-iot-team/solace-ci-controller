@@ -83,7 +83,7 @@ jobs:
           #   vm_admin_password=${{github.event.inputs.vm_admin_password}}
       - name: "TEST: show the deploy output"
         run: |
-          echo "outputs=${{toJson(github.azure_deploy.outputs)}}"
+          echo "outputs=${{toJson(steps.azure_deploy.outputs)}}"
 
 
     # - ARM Template:
