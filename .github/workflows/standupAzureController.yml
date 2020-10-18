@@ -108,9 +108,12 @@ jobs:
             username: ${{env.VM_USER_NAME}}
             password: ${{env.VM_PASSWORD}}
         - name: Execute bootstrap script
+          # https://blog.benoitblanchon.fr/github-action-run-ssh-commands/
           uses: garygrossgarten/github-action-ssh@release
           with:
-            command: bootstrap.sh
+            command: |
+              chmod u+x bootstrap.sh
+              ./bootstrap.sh
             host: ${{env.VM_PUBLIC_IP_ADDRESS}}
             username: ${{env.VM_USER_NAME}}
             password: ${{env.VM_PASSWORD}}
