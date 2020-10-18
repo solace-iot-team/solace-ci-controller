@@ -2,11 +2,10 @@
 
 > :warning: **UNDER CONSTRUCTION**
 
-- [Manual VM Creation](#manual-vm-creation)
-- [Using Github Actions](#using-github-actions-workflow)
+[Manual VM Creation](#manual-vm-creation) | [Using Github Actions](#using-github-actions-workflow)
 
-## Manual VM Creation
-
+## Manual VM Creation
+Create and configure the Controller VM manually.
 ### Pre-Requisites
 
 - Azure CLI
