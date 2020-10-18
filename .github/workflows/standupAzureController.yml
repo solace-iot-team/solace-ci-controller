@@ -33,12 +33,6 @@ env:
   AZURE_DEPLOY_ARM_TEMPLATE: ./azure/.workflows/azure-deploy.json
   BOOTSTRAP_SH: ./azure/.workflows/bootstrap.sh
 jobs: 
-  test:
-    runs-on: ubuntu-18.04
-    steps:
-      - name: Print Inputs
-        run: |
-          echo "inputs=${{toJson(github.event.inputs)}}"
   create_vm:
     runs-on: ubuntu-18.04
     outputs:
@@ -105,17 +99,18 @@ jobs:
             echo "resourceGroupName = ${{needs.create_vm.outputs.resourceGroupName}}"
         - name: Copy bootstrap script     
           # https://github.com/garygrossgarten/github-action-scp   
+          # no error handling: workflow will not fail on error
           uses: garygrossgarten/github-action-scp@release
           with:
             local: ${{env.BOOTSTRAP_SH}}
-            remote: ~/bootstrap.sh
+            remote: bootstrap.sh
             host: ${{env.VM_PUBLIC_IP_ADDRESS}}
             username: ${{env.VM_USER_NAME}}
             password: ${{env.VM_PASSWORD}}
         - name: Execute bootstrap script
           uses: garygrossgarten/github-action-ssh@release
           with:
-            command: ~/bootstrap.sh
+            command: bootstrap.sh
             host: ${{env.VM_PUBLIC_IP_ADDRESS}}
             username: ${{env.VM_USER_NAME}}
             password: ${{env.VM_PASSWORD}}
