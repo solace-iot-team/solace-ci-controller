@@ -82,7 +82,7 @@ jobs:
         with:
           subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           resourceGroupName: ${{env.AZURE_RESOURCE_GROUP}}
-          template: ${{AZURE_DEPLOY_ARM_TEMPLATE}}
+          template: ${{env.AZURE_DEPLOY_ARM_TEMPLATE}}
           parameters: id=${{github.event.inputs.controller_id}} zone=${{github.event.inputs.zone}} vm_admin_username=${{github.event.inputs.vm_admin_username}} vm_admin_password=${{github.event.inputs.vm_admin_password}}
       - name: "TEST: show the deploy output"
         run: |
