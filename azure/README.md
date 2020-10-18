@@ -2,7 +2,7 @@
 
 > :warning: **UNDER CONSTRUCTION**
 
-[Manual VM Creation](#manual-vm-creation) | [Using Github Actions](#using-github-actions-workflow)
+[Manual VM Creation](#manual-vm-creation) | [Manually Delete VM](#manually-delete-vm) | [Using Github Actions](#using-github-actions-workflow)
 
 ## Manual VM Creation
 Create and configure the Controller VM manually.
@@ -124,7 +124,11 @@ terraform version
 cd ~/downloads
 wget -O solace-pubsub-evaluation-docker.tar.gz https://products.solace.com/download/PUBSUB_DOCKER_EVAL
 ````
-
+## Manually Delete VM
+Requires state directory created by manual vm creation.
+````bash
+./delete.sh
+````
 ## Using Github Actions Workflow
 
 ### Pre-Requisites
