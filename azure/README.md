@@ -9,17 +9,29 @@
 ### Create the service principal and set the secret
 ````bash
 export SP_NAME="{unique-service-principal-name}"
-export SUBSCRIPTION_ID="{subscription-id}"
 
 # example:
 export SP_NAME="solace-ci-controller-sp"
-
 az ad sp create-for-rbac \
   --name $SP_NAME \
   --sdk-auth --role contributor
 
-  --scopes /subscriptions/$SUBSCRIPTION_ID/resourceGroups/{resource-group}
 ````
+
+      - OLD:
+        ````bash
+        export SP_NAME="{unique-service-principal-name}"
+        export SUBSCRIPTION_ID="{subscription-id}"
+
+        # example:
+        export SP_NAME="solace-ci-controller-sp"
+
+        az ad sp create-for-rbac \
+          --name $SP_NAME \
+          --sdk-auth --role contributor
+
+          --scopes /subscriptions/$SUBSCRIPTION_ID/resourceGroups/{resource-group}
+        ````
 #### Set the Secret in Github
 
 - AZURE_CREDENTIALS={the entire output from the command above}

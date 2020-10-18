@@ -27,9 +27,40 @@ jobs:
         uses: azure/login@v1.1
         with:
           creds: ${{secrets.AZURE_CREDENTIALS}}
-      - name: List all resource groups in westeurope
+      - name: "TEST: List all resource groups in westeurope"
         run: |
           az group list --query "[?location=='westeurope']"
+      - name: Checkout Repository
+        uses: actions/checkout@v1
+      - name: "TESTS: List Files after checkout"
+        run: |
+          pwd
+          ls -a
+          echo "GITHUB_SHA=$GITHUB_SHA"
+          echo "GITHUB_REPOSITORY=$GITHUB_REPOSITORY"
+          echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE"
+          echo "GITHUB_REF=$GITHUB_REF"
+          echo "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}"
+          echo "github.token=${{ github.token }}"  
+
+
+    # - ARM Template:
+    #     - https://github.com/marketplace/actions/deploy-azure-resource-manager-arm-template
+    #     - capture output for SSH
+    #         - retrieve the file ==> I want to use it manually
+    #     - capture IP address
+
+    #       but then: how do I capture the state?
+    #       --> artefacts?
+
+
+# checkout repo
+
+# create the parameters file:
+  # .workflow-state
+    # create.parameters.json
+
+# call create.sh ./.workflow-state/create.parameters.json
 
 
 
