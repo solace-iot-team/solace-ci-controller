@@ -80,7 +80,7 @@ jobs:
       - name: "TEST: show the deploy output"
         run: |
           echo "outputs:"
-          echo ${{toJson(steps.azure_deploy.outputs)}}
+          echo "${{toJson(steps.azure_deploy.outputs)}}"
       - name: "TEST: pwd via ssh"
         # https://github.com/marketplace/actions/run-ssh-command
         uses: garygrossgarten/github-action-ssh@release
