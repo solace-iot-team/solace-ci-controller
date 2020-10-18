@@ -67,8 +67,14 @@ jobs:
           subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           resourceGroupName: ${ AZURE_RESOURCE_GROUP }
           template: ./azure/azuredeploy.json
-          parameters: id=${{github.event.inputs.controller_id}} azLocation=${{github.event.inputs.azure_location}} zone=$${{github.event.inputs.zone}} vm_admin_username=${{github.event.inputs.vm_admin_username}} vm_admin_password=${{github.event.inputs.vm_admin_password}}
+          # parameters: id=${{github.event.inputs.controller_id}} azLocation=${{github.event.inputs.azure_location}} zone=${{github.event.inputs.zone}} vm_admin_username=${{github.event.inputs.vm_admin_username}} vm_admin_password=${{github.event.inputs.vm_admin_password}}
           # rgName=demoResourceGroup rgLocation=centralus
+          parameters: |
+            id=${{github.event.inputs.controller_id}} 
+            azLocation=${{github.event.inputs.azure_location}} 
+            zone=${{github.event.inputs.zone}} 
+            vm_admin_username=${{github.event.inputs.vm_admin_username}} 
+            vm_admin_password=${{github.event.inputs.vm_admin_password}}
       - name: "TEST: show the deploy output"
         run: |
           echo "outputs=${{toJson(github.azure_deploy.outputs)}}"
