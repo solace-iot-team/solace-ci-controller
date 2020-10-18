@@ -73,13 +73,11 @@ jobs:
         uses: azure/arm-deploy@v1
         with:
           subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          resourceGroupName: "${AZURE_RESOURCE_GROUP}"
+          resourceGroupName: ${{env.AZURE_RESOURCE_GROUP}}
           template: ./azure/azuredeploy.json
           # parameters: id=${{github.event.inputs.controller_id}} azLocation=${{github.event.inputs.azure_location}} zone=${{github.event.inputs.zone}} vm_admin_username=${{github.event.inputs.vm_admin_username}} vm_admin_password=${{github.event.inputs.vm_admin_password}}
           # rgName=demoResourceGroup rgLocation=centralus
           parameters: |
-            x="${AZURE_RESOURCE_GROUP}"
-            y=${{env.AZURE_RESOURCE_GROUP}}
             id=${{github.event.inputs.controller_id}} 
             azLocation=${{github.event.inputs.azure_location}} 
             zone=${{github.event.inputs.zone}} 
