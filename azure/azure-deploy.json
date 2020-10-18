@@ -240,18 +240,9 @@
             "type": "string",  
             "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddresses_controller_vmPublicIP_name'))).IpAddress]"
         },
-        "loginSSH": {
+        "resourceGroupName": {
             "type": "string",
-            "value": "[concat(
-                'ssh ',
-                reference(resourceId('Microsoft.Compute/virtualMachines', variables('virtualMachines_controller_vm_name'))).osProfile.adminUsername,
-                '@',
-                reference(resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddresses_controller_vmPublicIP_name'))).IpAddress
-            )]"
-        },
-        "loginPassword": {
-            "type": "string",
-            "value": "[parameters('vm_admin_password')]"
+            "value": "[resourceGroup().name]"
         }
     }
 }

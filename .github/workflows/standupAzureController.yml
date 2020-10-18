@@ -35,8 +35,11 @@ jobs:
       - name: Print Inputs
         run: |
           echo "inputs=${{toJson(github.event.inputs)}}"
-  deploy:
+  create_vm:
     runs-on: ubuntu-18.04
+    outputs:
+      publicIpAddress: ${{steps.azure_deploy.outputs.publicIPAddress}}
+      resourceGroupName: ${{steps.azure_deploy.outputs.resourceGroupName}}
     env:
       PROJECT_PREFIX: '${{github.event.inputs.controller_id}}-solace-ci-controller'
       AZURE_RESOURCE_GROUP: '${{github.event.inputs.controller_id}}-solace-ci-controller-rg'
@@ -81,14 +84,30 @@ jobs:
         run: |
           echo "outputs:"
           echo "${{toJson(steps.azure_deploy.outputs)}}"
-      - name: "TEST: pwd via ssh"
-        # https://github.com/marketplace/actions/run-ssh-command
-        uses: garygrossgarten/github-action-ssh@release
-        with:
-          command: pwd
-          host: ${{steps.azure_deploy.outputs.publicIPAddress}}
-          username: ${{github.event.inputs.vm_admin_username}}
-          password: ${{github.event.inputs.vm_admin_password}}
+  bootstrap_vm:
+      runs-on: ubuntu-18.04
+      needs: create_vm
+      env:
+        VM_PUBLIC_IP_ADDRESS: ${{needs.create_vm.outputs.publicIpAddress}}
+        VM_USER_NAME: ${{github.event.inputs.vm_admin_username}}   
+        VM_PASSWORD: ${{github.event.inputs.vm_admin_password}}   
+      steps:        
+        - name: "TEST: show the create_vm output"          
+          run: |
+            echo "outputs from create_vm:"
+            echo "publicIpAddress = ${VM_PUBLIC_IP_ADDRESS}"
+            echo "resourceGroupName = ${{needs.create_vm.outputs.resourceGroupName}}"
+        - name: "TEST: pwd via ssh"
+          # https://github.com/marketplace/actions/run-ssh-command
+          uses: garygrossgarten/github-action-ssh@release
+          with:
+            command: |
+              pwd
+              ls -la
+              echo "we are in!"
+            host: ${VM_PUBLIC_IP_ADDRESS}
+            username: ${VM_USER_NAME}
+            password: ${VM_PASSWORD}
 
     # - ARM Template:
     #     - https://github.com/marketplace/actions/deploy-azure-resource-manager-arm-template
