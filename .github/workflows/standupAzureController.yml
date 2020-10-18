@@ -70,21 +70,25 @@ jobs:
             --verbose
       - name: Run ARM Deploy
         id: azure_deploy
+        # https://github.com/marketplace/actions/deploy-azure-resource-manager-arm-template
         uses: azure/arm-deploy@v1
         with:
           subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           resourceGroupName: ${{env.AZURE_RESOURCE_GROUP}}
           template: ./azure/azure-deploy.json
           parameters: id=${{github.event.inputs.controller_id}} zone=${{github.event.inputs.zone}} vm_admin_username=${{github.event.inputs.vm_admin_username}} vm_admin_password=${{github.event.inputs.vm_admin_password}}
-          # parameters: |
-          #   id=${{github.event.inputs.controller_id}} 
-          #   zone=${{github.event.inputs.zone}} 
-          #   vm_admin_username=${{github.event.inputs.vm_admin_username}} 
-          #   vm_admin_password=${{github.event.inputs.vm_admin_password}}
       - name: "TEST: show the deploy output"
         run: |
-          echo "outputs=${{toJson(steps.azure_deploy.outputs)}}"
-
+          echo "outputs:"
+          echo ${{toJson(steps.azure_deploy.outputs)}}
+      - name: "TEST: pwd via ssh"
+        # https://github.com/marketplace/actions/run-ssh-command
+        uses: garygrossgarten/github-action-ssh@release
+        with:
+          command: pwd
+          host: ${{steps.azure_deploy.outputs.publicIPAddress}}
+          username: ${{github.event.inputs.vm_admin_username}}
+          password: ${{github.event.inputs.vm_admin_password}}
 
     # - ARM Template:
     #     - https://github.com/marketplace/actions/deploy-azure-resource-manager-arm-template
@@ -95,8 +99,6 @@ jobs:
     #       but then: how do I capture the state?
     #       --> artefacts?
 
-
-# checkout repo
 
 # create the parameters file:
   # .workflow-state
