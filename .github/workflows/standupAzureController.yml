@@ -105,9 +105,9 @@ jobs:
               pwd
               ls -la
               echo "we are in!"
-            host: ${VM_PUBLIC_IP_ADDRESS}
-            username: ${VM_USER_NAME}
-            password: ${VM_PASSWORD}
+            host: ${{env.VM_PUBLIC_IP_ADDRESS}}
+            username: ${{env.VM_USER_NAME}}
+            password: ${{env.VM_PASSWORD}}
 
     # - ARM Template:
     #     - https://github.com/marketplace/actions/deploy-azure-resource-manager-arm-template
