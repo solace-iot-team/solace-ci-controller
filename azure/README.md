@@ -2,63 +2,26 @@
 
 > :warning: **UNDER CONSTRUCTION**
 
-## Pre-Requisites
+- [Manual VM Creation](#manual-vm-creation)
+- [Using Github Actions](#using-github-actions-workflow)
 
-- Azure CLI
+## Manual VM Creation
 
-### Create the service principal and set the secret
-````bash
-export SP_NAME="{unique-service-principal-name}"
-
-# example:
-export SP_NAME="solace-ci-controller-sp"
-az ad sp create-for-rbac \
-  --name $SP_NAME \
-  --sdk-auth --role contributor
-
-````
-
-      - OLD:
-        ````bash
-        export SP_NAME="{unique-service-principal-name}"
-        export SUBSCRIPTION_ID="{subscription-id}"
-
-        # example:
-        export SP_NAME="solace-ci-controller-sp"
-
-        az ad sp create-for-rbac \
-          --name $SP_NAME \
-          --sdk-auth --role contributor
-
-          --scopes /subscriptions/$SUBSCRIPTION_ID/resourceGroups/{resource-group}
-        ````
-#### Set the Secret in Github
-
-- AZURE_CREDENTIALS={the entire output from the command above}
-
-### Secret: Azure Subscription Id
-
-- AZURE_SUBSCRIPTION_ID={subscription-id}
----
-The End.
-
-
-Uses ARM.
-
-## Pre-Requisites
+### Pre-Requisites
 
 - Azure CLI
 - Bash
+- jq
 
-## Configure
+### Configure
 ````bash
 cp template.create.parameters.json create.parameters.json
 vi create.parameters.json
 # enter details
  ...
-# Note: for better performance, match the zones of the controller with the test infrastructure
+# Note: for better performance, match the zone of the controller with the test infrastructure
 ````
-## Create the VM
+### Create the VM
 ````bash
 ./create.sh
 ````
@@ -69,10 +32,10 @@ ls ./state/*.json
 cat ./state/loginSSH.sh
 ````
 
-## Configure VM Manually
+### Configure VM 
 _**Note: these instructions are based on Ubuntu.**_
 
-### Login
+#### Login
 
 If you have ssh:
 ````bash
@@ -85,7 +48,7 @@ Connection info:
 cat ./state/loginSSH.sh
 ````
 
-### Python3
+#### Python3
 ````bash
 sudo apt update
 sudo apt -y upgrade
@@ -101,7 +64,7 @@ sudo apt install python3-pip
 pip3 -V
 ````
 
-### Ansible & Ansible Solace
+#### Ansible & Ansible Solace
 ````bash
 sudo -H python3 -m pip install ansible==2.9.11
 pip3 show ansible
@@ -119,7 +82,7 @@ source ~/.bash_profile
 env | grep ANS
 
 ````
-### Misc Tools
+#### Misc Tools
 ````bash
 sudo apt install jq
 jq --version
@@ -130,7 +93,7 @@ yq --version
 sudo apt install unzip
 ````
 
-### Azure CLI
+#### Azure CLI
 ````bash
  curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 
@@ -143,7 +106,7 @@ sudo apt install unzip
 
 ````
 
-### Terraform
+#### Terraform
 
 ````bash
 mkdir ~/downloads
@@ -156,32 +119,38 @@ sudo cp terraform /usr/local/bin
 terraform version
 ````
 
-### Solace Docker Image
+#### Solace Docker Image
 
 ````bash
 cd ~/downloads
 wget -O solace-pubsub-evaluation-docker.tar.gz https://products.solace.com/download/PUBSUB_DOCKER_EVAL
 ````
 
-## Get the Project
+## Using Github Actions Workflow
 
-Clone the master or get a specific release.
+### Pre-Requisites
 
-Master:
+- Azure CLI
+
+#### Create the service principal
 ````bash
+export SP_NAME="{unique-service-principal-name}"
 
-mkdir {project-root}
-cd {project-root}
+# example:
+export SP_NAME="solace-ci-controller-sp"
+az ad sp create-for-rbac \
+  --name $SP_NAME \
+  --sdk-auth --role contributor
 
-git clone https://github.com/solace-iot-team/az-use-case-perf-tests.git
 ````
 
-### Link Docker Image into Project
-````bash
-cd {project-root}/az-use-case-perf-tests/bin/pubsub
-ln -s ~/downloads/solace-pubsub-evaluation-docker.tar.gz solace-pubsub-docker.tar.gz
-````
 
+#### Set the Secrets
 
+- **AZURE_CREDENTIALS**={the entire output from service principal command}
+
+- **AZURE_SUBSCRIPTION_ID**={subscription-id}
 ---
 The End.
+
+
