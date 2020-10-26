@@ -134,7 +134,8 @@ jobs:
             '
             # echo '::set-output name=vmPublicKeyParam::$value'  
 
-            echo "vmPublicKeyParam=$value" >> $GITHUB_ENV
+            echo "value = $value"  
+            # echo "vmPublicKeyParam=$value" >> $GITHUB_ENV
 
       - name: Print arm_params      
         run: |
