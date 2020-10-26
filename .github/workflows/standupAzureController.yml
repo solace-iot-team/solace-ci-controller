@@ -59,6 +59,14 @@ jobs:
       # - name: "DEBUG: STOP WORKFLOW"
       #   run: exit 1
 
+      - name: Install jq
+        run: |
+          sudo apt install jq
+          jq --version
+
+      - name: "DEBUG: STOP WORKFLOW"
+        run: exit 1
+
       - name: Checkout Repository
         uses: actions/checkout@master
       - name: "TESTS: List Files after checkout"
