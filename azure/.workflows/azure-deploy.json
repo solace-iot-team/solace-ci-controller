@@ -27,7 +27,7 @@
             }
         },
         "vm_admin_public_key": {
-            "type": "string",
+            "type": "securestring",
             "metadata": {
                 "description": "Specifies the SSH rsa public key file as a string. Use \"ssh-keygen -t rsa -b 4096\" to generate your SSH key pairs."
             }
@@ -218,7 +218,7 @@
                     "computerName": "[variables('virtualMachines_controller_vm_name')]",
                     "adminUsername": "[parameters('vm_admin_username')]",
                     "linuxConfiguration": {
-                        "disablePasswordAuthentication": false,
+                        "disablePasswordAuthentication": true,
                         "ssh": {
                             "publicKeys": [
                                 {

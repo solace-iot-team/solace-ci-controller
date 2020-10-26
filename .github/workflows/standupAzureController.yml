@@ -23,24 +23,41 @@ on:
           description: "the vm admin username"
           required: true
           default: "controller"
-      vm_admin_public_key:
-          description: "the vm admin public key"
+      azure_key_vault_name:
+          description: "the name of the azure key vault"
           required: true
+          default: "solace-ci-controller-kv"
+      vm_admin_public_key_secret_name:
+          description: "the name of the public key in the azure key vault"
+          required: true
+          default: "vm-admin-public-key"
+      vm_admin_private_key_secret_name:
+          description: "the name of the public key in the azure key vault"
+          required: true
+          default: "vm-admin-private-key"
+
 env:
   PROJECT_PREFIX: '${{github.event.inputs.controller_id}}-solace-ci-controller'
   AZURE_RESOURCE_GROUP: '${{github.event.inputs.controller_id}}-solace-ci-controller-rg'
   AZURE_DEPLOY_ARM_TEMPLATE: ./azure/.workflows/azure-deploy.json
   BOOTSTRAP_SH: ./azure/.workflows/bootstrap.sh
+  KEY_FILE: ./azure_key  
 jobs:
   create_vm:
     runs-on: ubuntu-18.04
     outputs:
       publicIpAddress: ${{steps.azure_deploy.outputs.publicIPAddress}}
       resourceGroupName: ${{steps.azure_deploy.outputs.resourceGroupName}}
-    # env:
-    #   PROJECT_PREFIX: '${{github.event.inputs.controller_id}}-solace-ci-controller'
-    #   AZURE_RESOURCE_GROUP: '${{github.event.inputs.controller_id}}-solace-ci-controller-rg'
     steps:
+      - name: Test Env Json Var
+        env: 
+          vmPublicKeyParam: '{"reference":{"keyVault":{"id":"/subscriptions/${{secrets.AZURE_SUBSCRIPTION_ID}}/resourceGroups/${AZURE_RESOURCE_GROUP}/providers/Microsoft.KeyVault/vaults/${{github.event.inputs.azure_key_vault_name}}"},"secretName":"${{github.event.inputs.vm_admin_public_key_secret_name}}"}}'
+        run: |
+          echo ${{fromJson(env.vmPublicKeyParam)}}
+
+      - name: "DEBUG: STOP WORKFLOW"
+        run: exit 1
+
       - name: Checkout Repository
         uses: actions/checkout@master
       - name: "TESTS: List Files after checkout"
@@ -53,6 +70,9 @@ jobs:
           echo "GITHUB_REF=$GITHUB_REF"
           echo "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}"
           echo "github.token=${{ github.token }}"
+      - name: Generate Public/Private Key for Controller VM
+        run: |
+          ssh-keygen -t rsa -N '' -f ${KEY_FILE} <<< y 
       - name: Azure Login
         # https://github.com/marketplace/actions/azure-login
         uses: azure/login@v1.1
@@ -61,14 +81,54 @@ jobs:
       - name: "TEST: List all resource groups in specified location"
         run: |
           az group list --query "[?location=='${{github.event.inputs.azure_location}}']"
-      - name: Create Resource Group
+      - name: Create Azure Resource Group
         run: |
           az group create \
             --name ${AZURE_RESOURCE_GROUP} \
             --location ${{github.event.inputs.azure_location}} \
             --tags project=${PROJECT_PREFIX} \
             --verbose
+      - name: Create Azure Key Vault
+        run: |
+          az keyvault create \
+            --name ${{github.event.inputs.azure_key_vault_name}} \
+            --resource-group ${AZURE_RESOURCE_GROUP} \
+            --location ${{github.event.inputs.azure_location}} \
+            --tags project=${PROJECT_PREFIX} \
+            --enabled-for-template-deployment true \
+            --verbose
+
+      - name: Test Env Json Var
+        env: 
+          vmPublicKeyParam: '{"reference":{"keyVault":{"id":"/subscriptions/${{secrets.AZURE_SUBSCRIPTION_ID}}/resourceGroups/${AZURE_RESOURCE_GROUP}/providers/Microsoft.KeyVault/vaults/${{github.event.inputs.azure_key_vault_name}}"},"secretName":"${{github.event.inputs.vm_admin_public_key_secret_name}}"}}'
+        run: |
+          echo ${{fromJson(env.vmPublicKeyParam)}}
+
+      - name: "DEBUG: STOP WORKFLOW"
+        run: exit 1
+
+
+      - name: Set Azure Key Vault Secret - vm public key
+        run: |
+          az keyvault secret set \
+            --vault-name ${{github.event.inputs.azure_key_vault_name}} \
+            --name ${{github.event.inputs.vm_admin_public_key_secret_name}} \
+            --file ${KEY_FILE}.pub \
+            --verbose
+      - name: Set Azure Key Vault Secret - vm private key
+        run: |
+          az keyvault secret set \
+            --vault-name ${{github.event.inputs.azure_key_vault_name}} \
+            --name ${{github.event.inputs.vm_admin_private_key_secret_name}} \
+            --file ${KEY_FILE} \
+            --verbose
+      
+      - name: "DEBUG: STOP WORKFLOW"
+        run: exit 1
+
       - name: Run ARM Deploy
+        env: 
+          vmPublicKeyParam: '{"reference":{"keyVault":{"id":"/subscriptions/${{secrets.AZURE_SUBSCRIPTION_ID}}/resourceGroups/${AZURE_RESOURCE_GROUP}/providers/Microsoft.KeyVault/vaults/${{github.event.inputs.azure_key_vault_name}}"},"secretName":"${{github.event.inputs.vm_admin_public_key_secret_name}}"}}'
         id: azure_deploy
         # https://github.com/marketplace/actions/deploy-azure-resource-manager-arm-template
         uses: azure/arm-deploy@v1
@@ -76,7 +136,8 @@ jobs:
           subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           resourceGroupName: ${{env.AZURE_RESOURCE_GROUP}}
           template: ${{env.AZURE_DEPLOY_ARM_TEMPLATE}}
-          parameters: id=${{github.event.inputs.controller_id}} zone=${{github.event.inputs.zone}} vm_admin_username=${{github.event.inputs.vm_admin_username}} vm_admin_public_key=${{github.event.inputs.vm_admin_public_key}}
+          # parameters: id=${{github.event.inputs.controller_id}} zone=${{github.event.inputs.zone}} vm_admin_username=${{github.event.inputs.vm_admin_username}} vm_admin_public_key=${{github.event.inputs.vm_admin_public_key}}
+          parameters: vm_admin_public_key=${{fromJson(env.vmPublicKeyParam)}} id=${{github.event.inputs.controller_id}} zone=${{github.event.inputs.zone}} vm_admin_username=${{github.event.inputs.vm_admin_username}} 
       - name: "TEST: show the deploy output"
         run: |
           echo "outputs:"

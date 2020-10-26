@@ -13,13 +13,15 @@
 
 #####################################################################################
 # environment vars
+
     if [ -z "$PARAMETERS_FILE" ]; then export PARAMETERS_FILE=$scriptDir/create.parameters.json; fi    
+    if [ -z "$AZ_LOCATION" ]; then export AZ_LOCATION="westeurope"; fi    
 
 #####################################################################################
 # vars
 
   parametersFile=$(assertFile $PARAMETERS_FILE) || exit
-  templateFile=$(assertFile $scriptDir/create.template.json) || exit
+  templateFile=$(assertFile $scriptDir/.workflows/azure-deploy.json) || exit
   stateDir="$scriptDir/state"
   stateFile="$stateDir/create.state.json"
   loginSSHOutFile="$stateDir/loginSSH.sh"
@@ -27,12 +29,15 @@
   FAILED=0
   parameters=$(cat $parametersFile | jq .)
   id=$( echo $parameters | jq -r '.parameters.id.value' )
-  azLocation=$( echo $parameters | jq -r '.parameters.azLocation.value' )
+  azLocation=$AZ_LOCATION
 
   projectPrefix=$id"-solace-ci-controller"
   resourceGroup=$projectPrefix-rg
-
-
+  
+  privateKeyFile=$scriptDir/azure_key
+  keyVaultName=$projectPrefix
+  vmAdminPublicKeySecretName="vm-admin-public-key"
+  vmAdminPrivateKeySecretName="vm-admin-private-key"
 
 echo
 echo "##########################################################################################"
@@ -59,6 +64,49 @@ echo $resp | jq
 echo " >>> Success."
 
 #####################################################################################
+# Keyvault
+
+ssh-keygen -t rsa -N '' -f $privateKeyFile <<< y
+
+resp=$(az keyvault create \
+  --name $keyVaultName \
+  --resource-group $resourceGroup \
+  --location $azLocation \
+  --tags project=$projectPrefix \
+  --enabled-for-template-deployment true \
+  --verbose)
+if [[ $? != 0 ]]; then echo ">>> ERROR: creating key vault"; exit 1; fi
+echo $resp | jq
+echo " >>> Success."
+
+
+exit
+
+resp=$(az keyvault secret set \
+  --vault-name $keyVaultName \
+  --name $vmAdminPublicKeySecretName \
+  --file $privateKeyFile.pub \
+  --verbose)
+if [[ $? != 0 ]]; then echo ">>> ERROR: set key vault secret: $vmAdminPublicKeySecretName"; exit 1; fi
+echo $resp | jq
+echo " >>> Success."
+
+resp=$(az keyvault secret set \
+  --vault-name $keyVaultName \
+  --name $vmAdminPrivateKeySecretName \
+  --file $privateKeyFile \
+  --verbose)
+if [[ $? != 0 ]]; then echo ">>> ERROR: set key vault secret: $vmAdminPrivateKeySecretName"; exit 1; fi
+echo $resp | jq
+echo " >>> Success."
+
+# Example for Workflow
+# az keyvault secret download \
+#   --vault-name $keyVaultName \
+#   --name $vmAdminPrivateKeySecretName \
+#   --file "./downloaded.azure_key"
+
+#####################################################################################
 # Run ARM Template
 echo ">>> Creating Resources ..."
 az deployment group create \
@@ -81,11 +129,10 @@ else
   cp $parametersFile $stateDir
 fi
 # create login script
-loginPwd=$(cat $stateFile | jq -r '.properties.outputs.loginPassword.value' )
-loginSSH=$(cat $stateFile | jq -r '.properties.outputs.loginSSH.value' )
+publicIpAddress=$(cat $stateFile | jq -r '.properties.outputs.publicIPAddress.value' )
+adminUserName=$(cat $parametersFile | jq -r '.parameters.vm_admin_username.value' )
 echo "####" > $loginSSHOutFile
-echo "echo 'password: $loginPwd'" >> $loginSSHOutFile
-echo $loginSSH >> $loginSSHOutFile
+echo "ssh -i ./azure_key $adminUserName@$publicIpAddress" >> $loginSSHOutFile
 chmod u+x $loginSSHOutFile
 echo ">>> Success."
 echo ">>> log in: $loginSSHOutFile"
