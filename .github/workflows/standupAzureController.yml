@@ -148,8 +148,8 @@ jobs:
           # echo "${{toJson(env.vmPublicKeyParam)}}"
 
         
-      - name: "DEBUG: STOP WORKFLOW"
-        run: exit 1
+      # - name: "DEBUG: STOP WORKFLOW"
+      #   run: exit 1
 
 
       - name: Run ARM Deploy
@@ -163,11 +163,17 @@ jobs:
           resourceGroupName: ${{env.AZURE_RESOURCE_GROUP}}
           template: ${{env.AZURE_DEPLOY_ARM_TEMPLATE}}
           # parameters: id=${{github.event.inputs.controller_id}} zone=${{github.event.inputs.zone}} vm_admin_username=${{github.event.inputs.vm_admin_username}} vm_admin_public_key=${{github.event.inputs.vm_admin_public_key}}
-          parameters: vm_admin_public_key=${{fromJson(env.vmPublicKeyParam)}} id=${{github.event.inputs.controller_id}} zone=${{github.event.inputs.zone}} vm_admin_username=${{github.event.inputs.vm_admin_username}} 
+          parameters: vm_admin_public_key=${{toJson(env.vmPublicKeyParam)}} id=${{github.event.inputs.controller_id}} zone=${{github.event.inputs.zone}} vm_admin_username=${{github.event.inputs.vm_admin_username}} 
       - name: "TEST: show the deploy output"
         run: |
           echo "outputs:"
           echo "${{toJson(steps.azure_deploy.outputs)}}"
+
+      - name: "DEBUG: STOP WORKFLOW"
+        run: exit 1
+
+
+
   bootstrap_vm:
       runs-on: ubuntu-18.04
       needs: create_vm
