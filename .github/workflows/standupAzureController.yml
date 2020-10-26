@@ -167,30 +167,34 @@ jobs:
         run: |
           echo ${{steps.getVmAdminPrivateKey.outputs.vm_admin_private_key_secret_name}}    
 
-      - name: "DEBUG: STOP WORKFLOW"
-        run: exit 1
-      
       - name: Configure SSH
         run: |
           mkdir -p ~/.ssh/
-          echo "$SSH_KEY" > ~/.ssh/staging.key
-          chmod 600 ~/.ssh/staging.key
+          echo "$SSH_KEY" > ~/.ssh/controller.key
+          chmod 600 ~/.ssh/controller.key
           cat >>~/.ssh/config <<END
-          Host staging
+          Host controller
             HostName $SSH_HOST
             User $SSH_USER
-            IdentityFile ~/.ssh/staging.key
+            IdentityFile ~/.ssh/controller.key
             StrictHostKeyChecking no
           END
+          chmod 600 ~/.ssh/config
         env:
-          SSH_USER: ${{ secrets.STAGING_SSH_USER }}
-          SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}
-          SSH_HOST: ${{ secrets.STAGING_SSH_HOST }}
+          SSH_USER: ${{ github.event.inputs.vm_admin_username }}
+          SSH_KEY: ${{ steps.getVmAdminPrivateKey.outputs.vm_admin_private_key_secret_name }}
+          SSH_HOST: ${{ steps.azure_deploy.outputs.outputs.publicIpAddress }}
 
       - name: RUN ssh command
         run: |
-          ssh staging 'sudo systemctl stop my-application'
+          ssh controller "\
+            ls -la && \
+            pwd
+          "
 
+      - name: "DEBUG: STOP WORKFLOW"
+        run: exit 1
+      
 
   bootstrap_vm:
       runs-on: ubuntu-18.04
