@@ -51,34 +51,18 @@ jobs:
       publicIpAddress: ${{steps.azure_deploy.outputs.publicIPAddress}}
       resourceGroupName: ${{steps.azure_deploy.outputs.resourceGroupName}}
     steps:
-      # - name: Test Env Json Var
-      #   env: 
-      #     vmPublicKeyParam: '{"reference":{"keyVault":{"id":"/subscriptions/${{secrets.AZURE_SUBSCRIPTION_ID}}/resourceGroups/${{env.AZURE_RESOURCE_GROUP}}/providers/Microsoft.KeyVault/vaults/${{github.event.inputs.azure_key_vault_name}}"},"secretName":"${{github.event.inputs.vm_admin_public_key_secret_name}}"}}'
-      #   run: |
-      #     echo "vmPublicKeyParam= '$vmPublicKeyParam'"
-      #     # ${{fromJson(env.vmPublicKeyParam)}}
-
-      # - name: "DEBUG: STOP WORKFLOW"
-      #   run: exit 1
-
-      # already installed  
-      # - name: Install jq
-      #   run: |
-      #     sudo apt install jq
-      #     jq --version
-
       - name: Checkout Repository
         uses: actions/checkout@master
-      - name: "TESTS: List Files after checkout"
-        run: |
-          pwd
-          ls -a
-          echo "GITHUB_SHA=$GITHUB_SHA"
-          echo "GITHUB_REPOSITORY=$GITHUB_REPOSITORY"
-          echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE"
-          echo "GITHUB_REF=$GITHUB_REF"
-          echo "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}"
-          echo "github.token=${{ github.token }}"
+      # - name: "TESTS: List Files after checkout"
+      #   run: |
+      #     pwd
+      #     ls -a
+      #     echo "GITHUB_SHA=$GITHUB_SHA"
+      #     echo "GITHUB_REPOSITORY=$GITHUB_REPOSITORY"
+      #     echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE"
+      #     echo "GITHUB_REF=$GITHUB_REF"
+      #     echo "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}"
+      #     echo "github.token=${{ github.token }}"
       - name: Generate Parameters File
         run: |
           parametersJson=$(cat ${PARAMTERS_TEMPLATE_FILE} | jq .)
@@ -103,21 +87,24 @@ jobs:
 
           echo $parametersJson | jq . > ${PARAMETERS_FILE}    
 
-      - name: Show Parameters File
-        run: |
-          cat ${PARAMETERS_FILE}
+      # - name: Show Parameters File
+      #   run: |
+      #     cat ${PARAMETERS_FILE}
 
       - name: Generate Public/Private Key for Controller VM
         run: |
           ssh-keygen -t rsa -N '' -f ${KEY_FILE} <<< y 
+
       - name: Azure Login
         # https://github.com/marketplace/actions/azure-login
         uses: azure/login@v1.1
         with:
           creds: ${{secrets.AZURE_CREDENTIALS}}
-      - name: "TEST: List all resource groups in specified location"
-        run: |
-          az group list --query "[?location=='${{github.event.inputs.azure_location}}']"
+
+      # - name: "TEST: List all resource groups in specified location"
+      #   run: |
+      #     az group list --query "[?location=='${{github.event.inputs.azure_location}}']"
+
       - name: Create Azure Resource Group
         run: |
           az group create \
@@ -163,15 +150,26 @@ jobs:
           # parameters: id=${{github.event.inputs.controller_id}} zone=${{github.event.inputs.zone}} vm_admin_username=${{github.event.inputs.vm_admin_username}} vm_admin_public_key=${{github.event.inputs.vm_admin_public_key}}
           # parameters: vm_admin_public_key=${{toJson(env.vmPublicKeyParam)}} id=${{github.event.inputs.controller_id}} zone=${{github.event.inputs.zone}} vm_admin_username=${{github.event.inputs.vm_admin_username}} 
           parameters: ${{env.PARAMETERS_FILE}}
+
       - name: "TEST: show the deploy output"
         run: |
           echo "outputs:"
           echo "${{toJson(steps.azure_deploy.outputs)}}"
 
+      - name: Get the Private Key from Vault
+        uses: Azure/get-keyvault-secrets@v1.0
+        with:
+          keyvault: ${{github.event.inputs.azure_key_vault_name}}
+          secrets: '${{github.event.inputs.vm_admin_private_key_secret_name}}'  # comma separated list of secret keys that need to be fetched from the Key Vault 
+        id: getVmAdminPrivateKey
+
+      - name: Show Private Key
+        run: |
+          echo ${{steps.getVmAdminPrivateKey.outputs}}    
+
       - name: "DEBUG: STOP WORKFLOW"
         run: exit 1
-
-
+      
 
   bootstrap_vm:
       runs-on: ubuntu-18.04
@@ -183,11 +181,29 @@ jobs:
       steps:
         - name: Checkout Repository
           uses: actions/checkout@master
+
+        - name: Get the Private Key from Vault
+          uses: Azure/get-keyvault-secrets@v1.0
+          with:
+            keyvault: ${{github.event.inputs.azure_key_vault_name}}
+            secrets: '${{github.event.inputs.vm_admin_private_key_secret_name}}'  # comma separated list of secret keys that need to be fetched from the Key Vault 
+          id: getVmAdminPrivateKey
+
+        - name: Show Private Key
+          run: |
+            echo ${{steps.getVmAdminPrivateKey.outputs}}    
+
+        - name: "DEBUG: STOP WORKFLOW"
+          run: exit 1
+
+
+         
         - name: "TEST: show the create_vm output"
           run: |
             echo "outputs from create_vm:"
             echo "publicIpAddress = ${VM_PUBLIC_IP_ADDRESS}"
             echo "resourceGroupName = ${{needs.create_vm.outputs.resourceGroupName}}"
+
         - name: Copy bootstrap script
           # https://github.com/garygrossgarten/github-action-scp
           # no error handling: workflow will not fail on error
