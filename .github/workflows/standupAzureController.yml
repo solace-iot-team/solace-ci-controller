@@ -10,7 +10,7 @@ on:
       controller_id:
           description: "unique controller id"
           required: true
-          default: t3
+          default: t4
       azure_location:
           description: "azure location / region"
           required: true
@@ -27,7 +27,7 @@ on:
           description: "name of the azure key vault"
           required: true
           # default: "solace-ci-controller-kv"
-          default: "sol-ci-ctrl-kv-3"
+          default: "sol-ci-ctrl-kv-4"
       vm_admin_public_key_secret_name:
           description: "public key name in key vault"
           required: true
@@ -183,11 +183,11 @@ jobs:
           chmod 600 ~/.ssh/config
           
           cat ~/.ssh/config
-          
+
         env:
           SSH_USER: ${{ github.event.inputs.vm_admin_username }}
           SSH_KEY: ${{ steps.getVmAdminPrivateKey.outputs.vm_admin_private_key_secret_name }}
-          SSH_HOST: ${{ steps.azure_deploy.outputs.outputs.publicIpAddress }}
+          SSH_HOST: ${{ steps.azure_deploy.outputs.publicIPAddress }}
 
       - name: RUN ssh command
         run: |
