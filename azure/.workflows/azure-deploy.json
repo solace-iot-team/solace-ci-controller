@@ -223,7 +223,15 @@
                             "publicKeys": [
                                 {
                                     "path": "[concat('/home/', parameters('vm_admin_username'), '/.ssh/authorized_keys')]",
-                                    "keyData": "[parameters('vm_admin_public_key')]"
+                                    // "keyData": "[parameters('vm_admin_public_key')]"
+                                    "keyData": {
+                                        "reference": {
+                                            "keyVault": {
+                                                "id": "/subscriptions/837ffe8b-4d6f-4611-908e-bbfd4106a53a/resourceGroups/c1-solace-ci-controller-rg/providers/Microsoft.KeyVault/vaults/c1-solace-ci-controller"
+                                            },
+                                            "secretName": "vm-admin-public-key"
+                                        }
+                                    }
                                 }
                             ]
                         },
