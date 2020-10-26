@@ -129,7 +129,10 @@ jobs:
               }
             }
             '
-            echo "::set-output name=vmPublicKeyParam::$value"  
+            echo '::set-output name=vmPublicKeyParam::$value'  
+            echo "::set-output name=simpleString::hello world"  
+            echo '::set-output name=simpleJson::{"hello":"world"}'
+
 
       - name: Print arm_params      
         run: |
