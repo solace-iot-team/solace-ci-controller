@@ -115,9 +115,30 @@ jobs:
             --name ${{github.event.inputs.vm_admin_private_key_secret_name}} \
             --file ${KEY_FILE} \
             --verbose
-      
-      # - name: "DEBUG: STOP WORKFLOW"
-      #   run: exit 1
+
+      - name: Create ARM Parameters
+        id: arm_params  
+        run: |
+            value='
+            {
+              "reference": {
+                "keyVault": {
+                  "id": "/subscriptions/837ffe8b-4d6f-4611-908e-bbfd4106a53a/resourceGroups/c1-solace-ci-controller-rg/providers/Microsoft.KeyVault/vaults/c1-solace-ci-controller"
+                },
+                "secretName": "vm-admin-public-key"
+              }
+            }
+            '
+            echo "::set-output name=vmPublicKeyParam::$value"  
+
+      - name: Print arm_params      
+        run: |
+          echo "steps.arm_params.outputs:"
+          echo "${{toJson(steps.arm_params.outputs)}}"
+        
+      - name: "DEBUG: STOP WORKFLOW"
+        run: exit 1
+
 
       - name: Run ARM Deploy
         env: 
