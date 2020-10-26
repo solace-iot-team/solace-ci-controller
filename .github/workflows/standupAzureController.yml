@@ -10,7 +10,7 @@ on:
       controller_id:
           description: "unique controller id"
           required: true
-          default: t1
+          default: t2
       azure_location:
           description: "azure location / region"
           required: true
