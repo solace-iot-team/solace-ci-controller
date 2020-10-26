@@ -1,0 +1,23 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "id": {
+            "value": "{unique-id}"
+        },
+        "zone": {
+            "value": "{zone}"
+        },
+        "vm_admin_username": {
+            "value": "{username}"
+        },
+        "vm_admin_public_key": {
+            "reference": {
+                "keyVault": {
+                    "id": "{vault-id}"
+                },
+                "secretName": "{secret-name}"
+            }
+        }
+    }
+}

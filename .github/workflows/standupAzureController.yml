@@ -42,6 +42,8 @@ env:
   AZURE_DEPLOY_ARM_TEMPLATE: ./azure/.workflows/azure-deploy.json
   BOOTSTRAP_SH: ./azure/.workflows/bootstrap.sh
   KEY_FILE: ./azure_key  
+  PARAMTERS_TEMPLATE_FILE: ./azure/.workflows/template.azure-deploy.parameters.json
+  PARAMETERS_FILE: ./azure/.workflows/azure-deploy.parameters.json
 jobs:
   create_vm:
     runs-on: ubuntu-18.04
@@ -59,13 +61,11 @@ jobs:
       # - name: "DEBUG: STOP WORKFLOW"
       #   run: exit 1
 
-      - name: Install jq
-        run: |
-          sudo apt install jq
-          jq --version
-
-      - name: "DEBUG: STOP WORKFLOW"
-        run: exit 1
+      # already installed  
+      # - name: Install jq
+      #   run: |
+      #     sudo apt install jq
+      #     jq --version
 
       - name: Checkout Repository
         uses: actions/checkout@master
@@ -79,6 +79,37 @@ jobs:
           echo "GITHUB_REF=$GITHUB_REF"
           echo "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}"
           echo "github.token=${{ github.token }}"
+      - name: Generated Parameters File
+        run: |
+          parametersJson=$(cat ${PARAMTERS_TEMPLATE_FILE} | jq .)
+          echo parametersJson=$parametersJson
+          export id=${{github.event.inputs.controller_id}}
+            parametersJson=$( echo $parametersJson | jq -r '.parameters.id.value=env.id' )
+          export zone=${{github.event.inputs.zone}}
+            parametersJson=$( echo $parametersJson | jq -r '.parameters.zone.value=env.zone' )
+          export vm_admin_username=${{github.event.inputs.vm_admin_username}}
+            parametersJson=$( echo $parametersJson | jq -r '.parameters.vm_admin_username.value=env.vm_admin_username' )
+          export vm_admin_public_key='
+            {
+              "reference": {
+                "keyVault": {
+                  "id": "/subscriptions/837ffe8b-4d6f-4611-908e-bbfd4106a53a/resourceGroups/c1-solace-ci-controller-rg/providers/Microsoft.KeyVault/vaults/c1-solace-ci-controller"
+                },
+                "secretName": "vm-admin-public-key"
+              }
+            }
+            '  
+              parametersJson=$( echo $parametersJson | jq -r '.parameters.vm_admin_public_key=(env.vm_admin_public_key|fromjson)' )
+
+          echo $parametersJson | jq . > ${PARAMETERS_FILE}    
+
+      - name: Show Parameters File
+        run: |
+          cat ${PARAMETERS_FILE}
+
+      - name: "DEBUG: STOP WORKFLOW"
+        run: exit 1
+
       - name: Generate Public/Private Key for Controller VM
         run: |
           ssh-keygen -t rsa -N '' -f ${KEY_FILE} <<< y 
