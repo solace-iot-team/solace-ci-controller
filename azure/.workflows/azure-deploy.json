@@ -26,10 +26,10 @@
                 "description": "The admin user name of the VM"
             }
         },
-        "vm_admin_password": {
+        "vm_admin_public_key": {
             "type": "string",
             "metadata": {
-                "description": "The admin password of the VM"
+                "description": "Specifies the SSH rsa public key file as a string. Use \"ssh-keygen -t rsa -b 4096\" to generate your SSH key pairs."
             }
         }
     },
@@ -217,9 +217,16 @@
                 "osProfile": {
                     "computerName": "[variables('virtualMachines_controller_vm_name')]",
                     "adminUsername": "[parameters('vm_admin_username')]",
-                    "adminPassword": "[parameters('vm_admin_password')]",
                     "linuxConfiguration": {
                         "disablePasswordAuthentication": false,
+                        "ssh": {
+                            "publicKeys": [
+                                {
+                                    "path": "[concat('/home/', parameters('vm_admin_username'), '/.ssh/authorized_keys')]",
+                                    "keyData": "[parameters('vm_admin_public_key')]"
+                                }
+                            ]
+                        },
                         "provisionVMAgent": true
                     },
                     "secrets": [],

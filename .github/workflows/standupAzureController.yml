@@ -19,20 +19,20 @@ on:
           description: "the availability zone"
           required: true
           default: "1"
-      vm_admin_username: 
+      vm_admin_username:
           description: "the vm admin username"
           required: true
           default: "controller"
-      vm_admin_password:
-          description: "the vm admin password"
+      vm_admin_public_key:
+          description: "the vm admin public key"
           required: true
-          default: "Controller-Solace-123"
+          # default: "Controller-Solace-123"
 env:
   PROJECT_PREFIX: '${{github.event.inputs.controller_id}}-solace-ci-controller'
   AZURE_RESOURCE_GROUP: '${{github.event.inputs.controller_id}}-solace-ci-controller-rg'
   AZURE_DEPLOY_ARM_TEMPLATE: ./azure/.workflows/azure-deploy.json
   BOOTSTRAP_SH: ./azure/.workflows/bootstrap.sh
-jobs: 
+jobs:
   create_vm:
     runs-on: ubuntu-18.04
     outputs:
@@ -53,7 +53,7 @@ jobs:
           echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE"
           echo "GITHUB_REF=$GITHUB_REF"
           echo "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}"
-          echo "github.token=${{ github.token }}"  
+          echo "github.token=${{ github.token }}"
       - name: Azure Login
         # https://github.com/marketplace/actions/azure-login
         uses: azure/login@v1.1
@@ -62,7 +62,7 @@ jobs:
       - name: "TEST: List all resource groups in specified location"
         run: |
           az group list --query "[?location=='${{github.event.inputs.azure_location}}']"
-      - name: Create Resource Group    
+      - name: Create Resource Group
         run: |
           az group create \
             --name ${AZURE_RESOURCE_GROUP} \
@@ -87,18 +87,18 @@ jobs:
       needs: create_vm
       env:
         VM_PUBLIC_IP_ADDRESS: ${{needs.create_vm.outputs.publicIpAddress}}
-        VM_USER_NAME: ${{github.event.inputs.vm_admin_username}}   
-        VM_PASSWORD: ${{github.event.inputs.vm_admin_password}}   
+        VM_USER_NAME: ${{github.event.inputs.vm_admin_username}}
+        VM_PASSWORD: ${{github.event.inputs.vm_admin_password}}
       steps:
         - name: Checkout Repository
           uses: actions/checkout@master
-        - name: "TEST: show the create_vm output"          
+        - name: "TEST: show the create_vm output"
           run: |
             echo "outputs from create_vm:"
             echo "publicIpAddress = ${VM_PUBLIC_IP_ADDRESS}"
             echo "resourceGroupName = ${{needs.create_vm.outputs.resourceGroupName}}"
-        - name: Copy bootstrap script     
-          # https://github.com/garygrossgarten/github-action-scp   
+        - name: Copy bootstrap script
+          # https://github.com/garygrossgarten/github-action-scp
           # no error handling: workflow will not fail on error
           uses: garygrossgarten/github-action-scp@release
           with:
