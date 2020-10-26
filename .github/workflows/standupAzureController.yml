@@ -79,7 +79,7 @@ jobs:
           echo "GITHUB_REF=$GITHUB_REF"
           echo "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}"
           echo "github.token=${{ github.token }}"
-      - name: Generated Parameters File
+      - name: Generate Parameters File
         run: |
           parametersJson=$(cat ${PARAMTERS_TEMPLATE_FILE} | jq .)
           echo parametersJson=$parametersJson
@@ -93,22 +93,19 @@ jobs:
             {
               "reference": {
                 "keyVault": {
-                  "id": "/subscriptions/837ffe8b-4d6f-4611-908e-bbfd4106a53a/resourceGroups/c1-solace-ci-controller-rg/providers/Microsoft.KeyVault/vaults/c1-solace-ci-controller"
+                  "id": "/subscriptions/${{secrets.AZURE_SUBSCRIPTION_ID}}/resourceGroups/${{env.AZURE_RESOURCE_GROUP}}/providers/Microsoft.KeyVault/vaults/${{github.event.inputs.azure_key_vault_name}}"
                 },
-                "secretName": "vm-admin-public-key"
+                "secretName": "${{github.event.inputs.vm_admin_public_key_secret_name}}"
               }
             }
             '  
-              parametersJson=$( echo $parametersJson | jq -r '.parameters.vm_admin_public_key=(env.vm_admin_public_key|fromjson)' )
+            parametersJson=$( echo $parametersJson | jq -r '.parameters.vm_admin_public_key=(env.vm_admin_public_key|fromjson)' )
 
           echo $parametersJson | jq . > ${PARAMETERS_FILE}    
 
       - name: Show Parameters File
         run: |
           cat ${PARAMETERS_FILE}
-
-      - name: "DEBUG: STOP WORKFLOW"
-        run: exit 1
 
       - name: Generate Public/Private Key for Controller VM
         run: |
@@ -155,45 +152,7 @@ jobs:
             --file ${KEY_FILE} \
             --verbose
 
-      - name: Create ARM Parameters
-        id: arm_params  
-        run: |
-            echo "::set-output name=simpleString::hello world"  
-            echo '::set-output name=simpleJson::{"hello":"world"}'
-
-            value='
-            {
-              "reference": {
-                "keyVault": {
-                  "id": "/subscriptions/837ffe8b-4d6f-4611-908e-bbfd4106a53a/resourceGroups/c1-solace-ci-controller-rg/providers/Microsoft.KeyVault/vaults/c1-solace-ci-controller"
-                },
-                "secretName": "vm-admin-public-key"
-              }
-            }
-            '
-            echo "value = $value"  
-
-            echo '::set-output name=vmPublicKeyParam::{"reference":{"keyVault":{"id":"/subscriptions/${{secrets.AZURE_SUBSCRIPTION_ID}}/resourceGroups/${{env.AZURE_RESOURCE_GROUP}}/providers/Microsoft.KeyVault/vaults/${{github.event.inputs.azure_key_vault_name}}"},"secretName":"${{github.event.inputs.vm_admin_public_key_secret_name}}"}}'  
-
-            # echo "vmPublicKeyParam=$value" >> $GITHUB_ENV
-
-      - name: Print arm_params      
-        run: |
-          echo "steps.arm_params.outputs.vmPublicKeyParam:"
-          echo "${{toJson(steps.arm_params.outputs.vmPublicKeyParam)}}"
-          
-          # echo "vmPublicKeyParam= '$vmPublicKeyParam'"
-          # echo "toJson(vmPublicKeyParam):"
-          # echo "${{toJson(env.vmPublicKeyParam)}}"
-
-        
-      # - name: "DEBUG: STOP WORKFLOW"
-      #   run: exit 1
-
-
       - name: Run ARM Deploy
-        env: 
-          vmPublicKeyParam: '{"reference":{"keyVault":{"id":"/subscriptions/${{secrets.AZURE_SUBSCRIPTION_ID}}/resourceGroups/${{env.AZURE_RESOURCE_GROUP}}/providers/Microsoft.KeyVault/vaults/${{github.event.inputs.azure_key_vault_name}}"},"secretName":"${{github.event.inputs.vm_admin_public_key_secret_name}}"}}'
         id: azure_deploy
         # https://github.com/marketplace/actions/deploy-azure-resource-manager-arm-template
         uses: azure/arm-deploy@v1
@@ -203,7 +162,7 @@ jobs:
           template: ${{env.AZURE_DEPLOY_ARM_TEMPLATE}}
           # parameters: id=${{github.event.inputs.controller_id}} zone=${{github.event.inputs.zone}} vm_admin_username=${{github.event.inputs.vm_admin_username}} vm_admin_public_key=${{github.event.inputs.vm_admin_public_key}}
           # parameters: vm_admin_public_key=${{toJson(env.vmPublicKeyParam)}} id=${{github.event.inputs.controller_id}} zone=${{github.event.inputs.zone}} vm_admin_username=${{github.event.inputs.vm_admin_username}} 
-          parameters: vm_admin_public_key=${{toJson(steps.arm_params.outputs.vmPublicKeyParam)}} id=${{github.event.inputs.controller_id}} zone=${{github.event.inputs.zone}} vm_admin_username=${{github.event.inputs.vm_admin_username}} 
+          parameters: ${PARAMETERS_FILE}
       - name: "TEST: show the deploy output"
         run: |
           echo "outputs:"
