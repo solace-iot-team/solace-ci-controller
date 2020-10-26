@@ -26,7 +26,6 @@ on:
       vm_admin_public_key:
           description: "the vm admin public key"
           required: true
-          # default: "Controller-Solace-123"
 env:
   PROJECT_PREFIX: '${{github.event.inputs.controller_id}}-solace-ci-controller'
   AZURE_RESOURCE_GROUP: '${{github.event.inputs.controller_id}}-solace-ci-controller-rg'
@@ -77,7 +76,7 @@ jobs:
           subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           resourceGroupName: ${{env.AZURE_RESOURCE_GROUP}}
           template: ${{env.AZURE_DEPLOY_ARM_TEMPLATE}}
-          parameters: id=${{github.event.inputs.controller_id}} zone=${{github.event.inputs.zone}} vm_admin_username=${{github.event.inputs.vm_admin_username}} vm_admin_password=${{github.event.inputs.vm_admin_password}}
+          parameters: id=${{github.event.inputs.controller_id}} zone=${{github.event.inputs.zone}} vm_admin_username=${{github.event.inputs.vm_admin_username}} vm_admin_public_key=${{github.event.inputs.vm_admin_public_key}}
       - name: "TEST: show the deploy output"
         run: |
           echo "outputs:"

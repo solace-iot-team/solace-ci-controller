@@ -154,9 +154,18 @@ az ad sp create-for-rbac \
 
 - **AZURE_SUBSCRIPTION_ID**={subscription-id}
 
+### Generate Public/Private Keys
+````bash
+ssh-keygen -t rsa -b 4096 -f azure_key
+# empty passphrase!
+````
 ### Run the Workflow
 
-Actions -> Standup Azure Controller -> Run workflow.
+Actions -> Standup Azure Controller.
+
+- paste contents of `azure_key.pub` into public key parameter.
+
+-> Run workflow.
 
 ---
 The End.
