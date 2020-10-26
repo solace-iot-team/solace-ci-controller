@@ -26,7 +26,8 @@ on:
       azure_key_vault_name:
           description: "name of the azure key vault"
           required: true
-          default: "solace-ci-controller-kv"
+          # default: "solace-ci-controller-kv"
+          default: "kv-1"
       vm_admin_public_key_secret_name:
           description: "public key name in key vault"
           required: true
