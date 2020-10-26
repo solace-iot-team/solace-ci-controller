@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       controller_id:
-          description: "the unique controller id"
+          description: "unique controller id"
           required: true
           default: t1
       azure_location:
@@ -16,23 +16,23 @@ on:
           required: true
           default: "westeurope"
       zone:
-          description: "the availability zone"
+          description: "azure availability zone"
           required: true
           default: "1"
       vm_admin_username:
-          description: "the vm admin username"
+          description: "vm admin username"
           required: true
           default: "controller"
       azure_key_vault_name:
-          description: "the name of the azure key vault"
+          description: "name of the azure key vault"
           required: true
           default: "solace-ci-controller-kv"
       vm_admin_public_key_secret_name:
-          description: "the name of the public key in the azure key vault"
+          description: "public key name in key vault"
           required: true
           default: "vm-admin-public-key"
       vm_admin_private_key_secret_name:
-          description: "the name of the public key in the azure key vault"
+          description: "private key name in key vault"
           required: true
           default: "vm-admin-private-key"
 
