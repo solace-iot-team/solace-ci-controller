@@ -162,7 +162,7 @@ jobs:
           template: ${{env.AZURE_DEPLOY_ARM_TEMPLATE}}
           # parameters: id=${{github.event.inputs.controller_id}} zone=${{github.event.inputs.zone}} vm_admin_username=${{github.event.inputs.vm_admin_username}} vm_admin_public_key=${{github.event.inputs.vm_admin_public_key}}
           # parameters: vm_admin_public_key=${{toJson(env.vmPublicKeyParam)}} id=${{github.event.inputs.controller_id}} zone=${{github.event.inputs.zone}} vm_admin_username=${{github.event.inputs.vm_admin_username}} 
-          parameters: ${PARAMETERS_FILE}
+          parameters: ${{env.PARAMETERS_FILE}}
       - name: "TEST: show the deploy output"
         run: |
           echo "outputs:"
