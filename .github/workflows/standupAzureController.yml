@@ -142,7 +142,7 @@ jobs:
           echo "${{toJson(steps.arm_params.outputs)}}"
           echo "vmPublicKeyParam= '$vmPublicKeyParam'"
           echo "toJson(vmPublicKeyParam):"
-          echo "${{toJson($vmPublicKeyParam)}}"
+          echo "${{toJson(env.vmPublicKeyParam)}}"
 
         
       - name: "DEBUG: STOP WORKFLOW"
