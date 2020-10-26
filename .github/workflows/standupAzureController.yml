@@ -116,8 +116,8 @@ jobs:
             --file ${KEY_FILE} \
             --verbose
       
-      - name: "DEBUG: STOP WORKFLOW"
-        run: exit 1
+      # - name: "DEBUG: STOP WORKFLOW"
+      #   run: exit 1
 
       - name: Run ARM Deploy
         env: 
