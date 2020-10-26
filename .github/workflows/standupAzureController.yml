@@ -119,6 +119,9 @@ jobs:
       - name: Create ARM Parameters
         id: arm_params  
         run: |
+            echo "::set-output name=simpleString::hello world"  
+            echo '::set-output name=simpleJson::{"hello":"world"}'
+
             value='
             {
               "reference": {
@@ -129,15 +132,18 @@ jobs:
               }
             }
             '
-            echo '::set-output name=vmPublicKeyParam::$value'  
-            echo "::set-output name=simpleString::hello world"  
-            echo '::set-output name=simpleJson::{"hello":"world"}'
+            # echo '::set-output name=vmPublicKeyParam::$value'  
 
+            echo "vmPublicKeyParam=$value" >> $GITHUB_ENV
 
       - name: Print arm_params      
         run: |
           echo "steps.arm_params.outputs:"
           echo "${{toJson(steps.arm_params.outputs)}}"
+          echo "vmPublicKeyParam= '$vmPublicKeyParam'"
+          echo "toJson(vmPublicKeyParam):"
+          echo "${{toJson($vmPublicKeyParam)}}"
+
         
       - name: "DEBUG: STOP WORKFLOW"
         run: exit 1
