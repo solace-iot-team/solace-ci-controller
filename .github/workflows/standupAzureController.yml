@@ -165,11 +165,32 @@ jobs:
 
       - name: Show Private Key
         run: |
-          echo ${{steps.getVmAdminPrivateKey.outputs}}    
+          echo ${{steps.getVmAdminPrivateKey.outputs.vm_admin_private_key_secret_name}}    
 
       - name: "DEBUG: STOP WORKFLOW"
         run: exit 1
       
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh/
+          echo "$SSH_KEY" > ~/.ssh/staging.key
+          chmod 600 ~/.ssh/staging.key
+          cat >>~/.ssh/config <<END
+          Host staging
+            HostName $SSH_HOST
+            User $SSH_USER
+            IdentityFile ~/.ssh/staging.key
+            StrictHostKeyChecking no
+          END
+        env:
+          SSH_USER: ${{ secrets.STAGING_SSH_USER }}
+          SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}
+          SSH_HOST: ${{ secrets.STAGING_SSH_HOST }}
+
+      - name: RUN ssh command
+        run: |
+          ssh staging 'sudo systemctl stop my-application'
+
 
   bootstrap_vm:
       runs-on: ubuntu-18.04
