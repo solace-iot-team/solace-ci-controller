@@ -51,9 +51,10 @@ jobs:
     steps:
       - name: Test Env Json Var
         env: 
-          vmPublicKeyParam: '{"reference":{"keyVault":{"id":"/subscriptions/${{secrets.AZURE_SUBSCRIPTION_ID}}/resourceGroups/${AZURE_RESOURCE_GROUP}/providers/Microsoft.KeyVault/vaults/${{github.event.inputs.azure_key_vault_name}}"},"secretName":"${{github.event.inputs.vm_admin_public_key_secret_name}}"}}'
+          vmPublicKeyParam: '{"reference":{"keyVault":{"id":"/subscriptions/${{secrets.AZURE_SUBSCRIPTION_ID}}/resourceGroups/${{env.AZURE_RESOURCE_GROUP}}/providers/Microsoft.KeyVault/vaults/${{github.event.inputs.azure_key_vault_name}}"},"secretName":"${{github.event.inputs.vm_admin_public_key_secret_name}}"}}'
         run: |
-          echo ${{fromJson(env.vmPublicKeyParam)}}
+          echo "vmPublicKeyParam= '$vmPublicKeyParam'"
+          # ${{fromJson(env.vmPublicKeyParam)}}
 
       - name: "DEBUG: STOP WORKFLOW"
         run: exit 1
