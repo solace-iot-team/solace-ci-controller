@@ -97,29 +97,29 @@ jobs:
             --tags project=${PROJECT_PREFIX} \
             --verbose
       
-      - name: ARM Deploy    
-        id: azure_deploy
-        run: |  
-          az deployment group create \
-            --name "${{ env.PROJECT_PREFIX }}_Deployment" \
-            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
-            --template-file ${{ env.AZURE_DEPLOY_ARM_TEMPLATE }} \
-            --parameters ${{ env.PARAMETERS_FILE }} vm_admin_public_key="${{ secrets.CONTROLLER_VM_PUBLIC_KEY }}" \
-            --verbose  
-
-
-
-      # - name: Run ARM Deploy
+      # - name: ARM Deploy    
       #   id: azure_deploy
-      #   # https://github.com/marketplace/actions/deploy-azure-resource-manager-arm-template
-      #   uses: azure/arm-deploy@v1.0.1
-      #   with:
-      #     subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      #     resourceGroupName: ${{ env.AZURE_RESOURCE_GROUP }}
-      #     template: ${{ env.AZURE_DEPLOY_ARM_TEMPLATE }}
-      #     # parameters: id=${{ github.event.inputs.controller_id }} zone=${{ github.event.inputs.zone }} vm_admin_username=${{ github.event.inputs.vm_admin_username }} vm_admin_public_key='${{ github.event.inputs.vm_pub_key }}'
-      #     # parameters: id=${{ github.event.inputs.controller_id }} zone=${{ github.event.inputs.zone }} vm_admin_username=${{ github.event.inputs.vm_admin_username }} vm_admin_public_key='${{ secrets.CONTROLLER_VM_PUBLIC_KEY }}'
-      #     parameters: ${{env.PARAMETERS_FILE}}
+      #   run: |  
+      #     az deployment group create \
+      #       --name "${{ env.PROJECT_PREFIX }}_Deployment" \
+      #       --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+      #       --template-file ${{ env.AZURE_DEPLOY_ARM_TEMPLATE }} \
+      #       --parameters ${{ env.PARAMETERS_FILE }} vm_admin_public_key="${{ secrets.CONTROLLER_VM_PUBLIC_KEY }}" \
+      #       --verbose  
+
+
+
+      - name: Run ARM Deploy
+        id: azure_deploy
+        # https://github.com/marketplace/actions/deploy-azure-resource-manager-arm-template
+        uses: azure/arm-deploy@v1.0.1
+        with:
+          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          resourceGroupName: ${{ env.AZURE_RESOURCE_GROUP }}
+          template: ${{ env.AZURE_DEPLOY_ARM_TEMPLATE }}
+          # parameters: id=${{ github.event.inputs.controller_id }} zone=${{ github.event.inputs.zone }} vm_admin_username=${{ github.event.inputs.vm_admin_username }} vm_admin_public_key='${{ github.event.inputs.vm_pub_key }}'
+          # parameters: id=${{ github.event.inputs.controller_id }} zone=${{ github.event.inputs.zone }} vm_admin_username=${{ github.event.inputs.vm_admin_username }} vm_admin_public_key='${{ secrets.CONTROLLER_VM_PUBLIC_KEY }}'
+          parameters: ${{env.PARAMETERS_FILE}} vm_admin_public_key="${{ secrets.CONTROLLER_VM_PUBLIC_KEY }}"
 
       - name: "TEST: show the deploy output"
         run: |
