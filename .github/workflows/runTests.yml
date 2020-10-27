@@ -163,7 +163,7 @@ jobs:
         run: |
           rm -rf ./remote-logs 
           mkdir -p ./remote-logs
-          sftp -p controller:release/solace-ci-controller-${{ github.event.inputs.release_tag }}/azure/.test/infra/logs/* ./remote_logs
+          sftp -p controller:release/solace-ci-controller-${{ github.event.inputs.release_tag }}/azure/.test/infra/logs/* ./remote-logs
       
       # if ok: get the badge, otherwise failed
 
