@@ -26,7 +26,7 @@ on:
       release_tag:
           description: "release tag to test"
           required: true
-          default: "v0.0.1"
+          default: "v0.0.2"
 env:
   PROJECT_PREFIX: '${{github.event.inputs.controller_id}}-solace-ci-controller'
   AZURE_RESOURCE_GROUP: '${{github.event.inputs.controller_id}}-solace-ci-controller-rg'
@@ -148,7 +148,7 @@ jobs:
           ssh controller "\
               cd ~/release/${REPO_NAME}-* && \
               cd azure/.test/infra && \
-              ./run.apply.sh
+              ./run.apply.fg.sh
           "
 
 
