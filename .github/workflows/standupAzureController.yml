@@ -128,7 +128,7 @@ jobs:
       - name: Controller - Get Release
         run: |
           ssh controller "\
-              mkdir ~/release && \
+              mkdir -p ~/release && \
               cd ~/release && \
               export RELEASE_TAG="v0.0.1" && \
               curl -L https://github.com/solace-iot-team/solace-ci-controller/archive/$RELEASE_TAG.zip --output release.$RELEASE_TAG.zip  && \
