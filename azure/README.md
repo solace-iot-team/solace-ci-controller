@@ -2,6 +2,30 @@
 
 > :warning: **UNDER CONSTRUCTION**
 
+## GitHub Secrets
+
+### Credentials
+
+[Generate the Service Principal](https://docs.microsoft.com/en-gb/cli/azure/ad/sp?view=azure-cli-latest#az_ad_sp_create_for_rbac).
+
+**Set Secrets:**
+AZURE_CREDENTIALS = {copy service principal output}
+
+AZURE_SUBSCRIPTION_ID = {subscription id}
+
+### Keys
+Generate:
+````bash
+ssh-keygen -t rsa -b 4096 azure_key
+````
+**Set Secrets:**
+CONTROLLER_VM_PRIVATE_KEY = {contents of azure_key}
+
+CONTROLLER_VM_PUBLIC_KEY = {contents of azure_key.pub}
+
+---
+THe End.
+
 [Manual VM Creation](#manual-vm-creation) | [Manually Delete VM](#manually-delete-vm) | [Using Github Actions](#using-github-actions-workflow)
 
 ## Manual VM Creation
