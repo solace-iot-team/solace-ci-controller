@@ -109,42 +109,23 @@ jobs:
           username: ${{ github.event.inputs.vm_admin_username }}
           privateKey: ${{ secrets.CONTROLLER_VM_PRIVATE_KEY }}
 
-      - name: ZZ
-        run: |
-          ssh controller "ls -la && pwd"
+      # - name: ZZ
+      #   run: |
+      #     ssh controller "ls -la && pwd"
 
-      - name: XX
+      - name: Set Bootstrap to Executable
         run: |
           ssh controller "chmod u+x bootstrap.sh"
 
-      - name: YY
+      - name: Run Bootstrap
         run: |
           ssh controller "./bootstrap.sh"
-
-      # - name: Execute bootstrap script
-      #   run: |
-      #     ssh controller 
-      #     "\
-      #       chmod u+x bootstrap.sh && \
-      #       ./bootstrap.sh \
-      #     "
-
-      # - name: "DEBUG: STOP WORKFLOW"
-      #   run: exit 1
       
+      - name: Show Job Outputs
+        run: |
+          echo "outputs:"
+          echo "${{toJson(jobs.create_vm.outputs)}}"
 
-      # - name: Execute bootstrap script
-      # # https://blog.benoitblanchon.fr/github-action-run-ssh-commands/
-      # uses: garygrossgarten/github-action-ssh@release
-      # with:
-      #   command: |
-      #     chmod u+x bootstrap.sh
-      #     ./bootstrap.sh
-      #   host: ${{env.VM_PUBLIC_IP_ADDRESS}}
-      #   username: ${{env.VM_USER_NAME}}
-      #   password: ${{env.VM_PASSWORD}}
-
-      
 
 ###
 # The End.
