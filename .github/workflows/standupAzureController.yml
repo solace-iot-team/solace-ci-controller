@@ -1,0 +1,152 @@
+# ---------------------------------------------------------------------------------------------
+# MIT License
+# Copyright (c) 2020, Solace Corporation, Ricardo Gomez-Ulmke (ricardo.gomez-ulmke@solace.com)
+# ---------------------------------------------------------------------------------------------
+
+name: Run Tests
+on:
+  workflow_dispatch:
+    inputs:
+      controller_id:
+          description: "unique controller id"
+          required: true
+          default: w1
+      azure_location:
+          description: "azure location / region"
+          required: true
+          default: "westeurope"
+      zone:
+          description: "azure availability zone"
+          required: true
+          default: "1"
+      vm_admin_username:
+          description: "vm admin username"
+          required: true
+          default: "controller"
+      release_tag:
+          description: "release tag to test"
+          required: true
+          default: "v0.0.1"
+env:
+  PROJECT_PREFIX: '${{github.event.inputs.controller_id}}-solace-ci-controller'
+  AZURE_RESOURCE_GROUP: '${{github.event.inputs.controller_id}}-solace-ci-controller-rg'
+  AZURE_DEPLOY_ARM_TEMPLATE: ./azure/.workflows/azure-deploy.json
+  BOOTSTRAP_SH: ./azure/.workflows/bootstrap.sh
+
+jobs:
+  run_tests:
+    runs-on: ubuntu-18.04
+    outputs:
+      publicIpAddress: ${{steps.azure_deploy.outputs.publicIPAddress}}
+      resourceGroupName: ${{steps.azure_deploy.outputs.resourceGroupName}}
+    steps:
+    # TODO: checkout the release tag - test the test as well
+      - name: Checkout Repository
+        uses: actions/checkout@master
+      # - name: "TESTS: List Files after checkout"
+      #   run: |
+      #     pwd
+      #     ls -a
+      #     echo "GITHUB_SHA=$GITHUB_SHA"
+      #     echo "GITHUB_REPOSITORY=$GITHUB_REPOSITORY"
+      #     echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE"
+      #     echo "GITHUB_REF=$GITHUB_REF"
+      #     echo "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}"
+      #     echo "github.token=${{ github.token }}"
+
+      - name: Azure Login
+        # https://github.com/marketplace/actions/azure-login
+        uses: azure/login@v1.1
+        with:
+          creds: ${{secrets.AZURE_CREDENTIALS}}
+
+      - name: Create Azure Resource Group
+        run: |
+          az group create \
+            --name ${AZURE_RESOURCE_GROUP} \
+            --location ${{github.event.inputs.azure_location}} \
+            --tags project=${PROJECT_PREFIX} \
+            --verbose
+      
+      - name: Run ARM Deploy
+        id: azure_deploy
+        # https://github.com/marketplace/actions/deploy-azure-resource-manager-arm-template
+        uses: azure/arm-deploy@v1.0.1
+        with:
+          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          resourceGroupName: ${{ env.AZURE_RESOURCE_GROUP }}
+          template: ${{ env.AZURE_DEPLOY_ARM_TEMPLATE }}
+          parameters: vm_admin_public_key="${{ secrets.CONTROLLER_VM_PUBLIC_KEY }}" id=${{ github.event.inputs.controller_id }} zone=${{ github.event.inputs.zone }} vm_admin_username=${{ github.event.inputs.vm_admin_username }}
+      
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh/
+          echo "${SSH_KEY}" > ~/.ssh/controller_key
+          chmod 600 ~/.ssh/controller_key
+          cat >>~/.ssh/config <<END
+          Host controller
+            HostName ${SSH_HOST}
+            User ${SSH_USER}
+            IdentityFile ~/.ssh/controller_key
+            StrictHostKeyChecking no
+          END
+          chmod 600 ~/.ssh/config
+          # cat ~/.ssh/config
+        env:
+          SSH_USER: ${{ github.event.inputs.vm_admin_username }}
+          SSH_KEY: ${{ secrets.CONTROLLER_VM_PRIVATE_KEY }}
+          SSH_HOST: ${{ steps.azure_deploy.outputs.publicIPAddress }}
+
+      - name: Controller - Copy bootstrap script
+        # https://github.com/garygrossgarten/github-action-scp
+        # no error handling: workflow will not fail on error
+        uses: garygrossgarten/github-action-scp@release
+        with:
+          local: ${{ env.BOOTSTRAP_SH }}
+          remote: bootstrap.sh
+          host: ${{ steps.azure_deploy.outputs.publicIPAddress }}
+          username: ${{ github.event.inputs.vm_admin_username }}
+          privateKey: ${{ secrets.CONTROLLER_VM_PRIVATE_KEY }}
+
+      - name: Controller - Set Bootstrap to Executable
+        run: |
+          ssh controller "chmod u+x bootstrap.sh"
+
+      - name: Controller - Run Bootstrap
+        run: |
+          ssh controller "./bootstrap.sh > ./bootstrap.sh.log"
+      
+      # - name: Show Job Outputs
+      #   run: |
+      #     echo "outputs:"
+      #     echo "${{toJson(jobs.create_vm.outputs)}}"
+
+      # - name: "Show azure deploy outputs"
+      #   run: |
+      #     echo "${{toJson(steps.azure_deploy.outputs)}}"
+
+
+      - name: Controller - Get Release
+        env:
+          REPO_NAME: solace-ci-controller
+        run: |
+          ssh controller "\
+              rm -rf ~/release && \
+              mkdir -p ~/release && \
+              cd ~/release && \
+              curl -L https://github.com/solace-iot-team/${REPO_NAME}/archive/${{ github.event.inputs.release_tag }}.zip --output release.${{ github.event.inputs.release_tag }}.zip  && \
+              unzip release.${{ github.event.inputs.release_tag }}.zip    
+          "
+
+      - name: Controller - Start Test
+        env:
+          REPO_NAME: solace-ci-controller
+        run: |
+          ssh controller "\
+              cd ~/release/${REPO_NAME}-* && \
+              cd azure/.test/infra && \
+              ./run.apply.sh
+          "
+
+###
+# The End.
