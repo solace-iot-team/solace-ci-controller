@@ -26,7 +26,7 @@ on:
       release_tag:
           description: "release tag to test"
           required: true
-          default: "v0.0.3"
+          default: "v0.0.4"
 env:
   PROJECT_PREFIX: '${{github.event.inputs.controller_id}}-solace-ci-controller'
   AZURE_RESOURCE_GROUP: '${{github.event.inputs.controller_id}}-solace-ci-controller-rg'
