@@ -106,8 +106,5 @@ echo ">>> cmd: $CMD"; $CMD; if [[ $? != 0 ]]; then echo ">>> ERROR: $scriptName:
 
 echo ">>> SUCCESS: bootstrapping VM."
 
-exit 1
-
-
 ###
 # The End.
