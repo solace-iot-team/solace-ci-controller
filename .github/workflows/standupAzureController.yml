@@ -67,12 +67,9 @@ jobs:
 
           echo $parametersJson | jq . > ${PARAMETERS_FILE}    
 
-      - name: Show Parameters File
-        run: |
-          cat ${PARAMETERS_FILE}
-
-      - name: "DEBUG: STOP WORKFLOW"
-        run: exit 1
+      # - name: Show Parameters File
+      #   run: |
+      #     cat ${PARAMETERS_FILE}
 
       - name: Azure Login
         # https://github.com/marketplace/actions/azure-login
@@ -109,27 +106,16 @@ jobs:
           echo "outputs:"
           echo "${{toJson(steps.azure_deploy.outputs)}}"
 
-      - name: Get the Private Key from Vault
-        uses: Azure/get-keyvault-secrets@v1.0
-        with:
-          keyvault: ${{github.event.inputs.azure_key_vault_name}}
-          secrets: '${{github.event.inputs.vm_admin_private_key_secret_name}}'  # comma separated list of secret keys that need to be fetched from the Key Vault 
-        id: getVmAdminPrivateKey
-
-      - name: Show Private Key
-        run: |
-          echo ${{steps.getVmAdminPrivateKey.outputs.vm_admin_private_key_secret_name}}    
-
       - name: Configure SSH
         run: |
           mkdir -p ~/.ssh/
-          echo "${SSH_KEY}" > ~/.ssh/controller.key
-          chmod 600 ~/.ssh/controller.key
+          echo "${SSH_KEY}" > ~/.ssh/controller_key
+          chmod 600 ~/.ssh/controller_key
           cat >>~/.ssh/config <<END
           Host controller
             HostName ${SSH_HOST}
             User ${SSH_USER}
-            IdentityFile ~/.ssh/controller.key
+            IdentityFile ~/.ssh/controller_key
             StrictHostKeyChecking no
           END
           chmod 600 ~/.ssh/config
@@ -138,7 +124,7 @@ jobs:
 
         env:
           SSH_USER: ${{ github.event.inputs.vm_admin_username }}
-          SSH_KEY: ${{ steps.getVmAdminPrivateKey.outputs.vm_admin_private_key_secret_name }}
+          SSH_KEY: ${{ secrets.CONTROLLER_VM_PRIVATE_KEY }}
           SSH_HOST: ${{ steps.azure_deploy.outputs.publicIPAddress }}
 
       - name: RUN ssh command
