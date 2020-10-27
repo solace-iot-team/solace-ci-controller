@@ -27,7 +27,7 @@
             }
         },
         "vm_admin_public_key": {
-            "type": "securestring",
+            "type": "string",
             "metadata": {
                 "description": "Specifies the SSH rsa public key file as a string. Use \"ssh-keygen -t rsa -b 4096\" to generate your SSH key pairs."
             }
