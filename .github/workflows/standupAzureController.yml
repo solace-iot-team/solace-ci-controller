@@ -59,7 +59,7 @@ jobs:
       - name: Generate Parameters File
         env:
           # PUBLIC_KEY: ${{ secrets.CONTROLLER_VM_PUBLIC_KEY }}
-          # PUBLIC_KEY: "hello-world"  
+          PUBLIC_KEY: "hello-world"  
           # PUBLIC_KEY: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCoii+97+HRgAP8I8cQEdJ9B4XapMS/OIH4N080aGaiQiN8FUff1569iUIdWSuSjCYdGIsjeSXMzXXlR+WPj0IpAWmKcwkqBJoKdJzH+jXJSWgcXwEZCQDUbZukBBHXvXyI8a5AA0KPoD2l1C+FIHWKEvNlw4zl0aHdikQ357iygbSbmuGjxPa8CoYYTPGz+gU1pIQSbXxiKgJrTfJPP4LZaPD11rWQLm14vKH/edH6OADdfURn9XWY87qTIYfjs7thyYw7TiG3xeMISngPmQIcjV+RPuPUHjQfnIdae8W5KRytJudq2g2FREoTo2bxzUPXc2IKmA0vcXohQrR3rkA8p0Xv+Alq1WoLGJZqYNRndGTc6m8prc+WsRs8KcQzdc+vvm/3IWqkU0793uGuE2+uNHtslNpFt0/3JWEWMpQHLwnJdUuN3xRp4e38SBr/1eDAtFgG4PnsnvArNigXmA9zZUr+iGAKfuamGJpQ8NhCE5iNvweVLv6N8ZT2QUgsRWM= rjgu@Ricardos-MacBook-Pro.local"
         run: |
           parametersJson=$(cat ${PARAMTERS_TEMPLATE_FILE} | jq .)
