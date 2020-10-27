@@ -12,12 +12,7 @@
             "value": "{username}"
         },
         "vm_admin_public_key": {
-            "reference": {
-                "keyVault": {
-                    "id": "{vault-id}"
-                },
-                "secretName": "{secret-name}"
-            }
+            "value": "{public-key}"
         }
     }
 }
