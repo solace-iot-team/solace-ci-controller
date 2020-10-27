@@ -137,14 +137,20 @@ jobs:
               unzip release.${{ github.event.inputs.release_tag }}.zip    
           "
 
+      - name: TODO - Controller - Bootstrap Tests
+        run: |
+          echo "run a script which does all the prep, like keys, download solace, etc."
+
       - name: Controller - Start Test
         env:
           REPO_NAME: solace-ci-controller
         run: |
           ssh controller "\
               cd ~/release/${REPO_NAME}-* && \
-              ls -la  
+              cd azure/.test/infra && \
+              ./run.apply.sh
           "
+
 
 ###
 # The End.
