@@ -109,13 +109,17 @@ jobs:
           username: ${{ github.event.inputs.vm_admin_username }}
           privateKey: ${{ secrets.CONTROLLER_VM_PRIVATE_KEY }}
 
-      - name: test
+      - name: test 1
         run: |
-          ssh controller 
-          " \
-            ls -la && \
-            pwd \
-          "
+          ssh controller "ls -la && pwd"
+
+      # - name: test 2
+      #   run: |
+      #     ssh controller 
+      #     " \
+      #       ls -la && \
+      #       pwd \
+      #     "
 
       - name: Execute bootstrap script
         run: |
