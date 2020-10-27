@@ -22,8 +22,7 @@ rm -f $LOG_DIR/*
 
 export TF_VARIABLES_DIR=$scriptDir
 
-# nohup ../_run.apply-all.sh > $LOG_DIR/$scriptName.out 2>&1 &
-../_run.apply-all.sh
+../_run.apply-all.sh > $LOG_DIR/$scriptName.out 2>&1
 
 ###
 # The End.
