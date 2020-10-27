@@ -129,7 +129,11 @@ jobs:
         run: |
           ssh controller "\
               mkdir ~/release && \
-              cd ~/release
+              cd ~/release && \
+              export RELEASE_TAG="v0.0.1" && \
+              curl -L https://github.com/solace-iot-team/solace-ci-controller/archive/$RELEASE_TAG.zip --output release.$RELEASE_TAG.zip  && \
+              unzip release.$RELEASE_TAG.zip    
+
           
           "
 
