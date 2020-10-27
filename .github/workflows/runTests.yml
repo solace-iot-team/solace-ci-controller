@@ -26,7 +26,7 @@ on:
       release_tag:
           description: "release tag to test"
           required: true
-          default: "v0.0.2"
+          default: "v0.0.3"
 env:
   PROJECT_PREFIX: '${{github.event.inputs.controller_id}}-solace-ci-controller'
   AZURE_RESOURCE_GROUP: '${{github.event.inputs.controller_id}}-solace-ci-controller-rg'
@@ -39,6 +39,9 @@ jobs:
     outputs:
       publicIpAddress: ${{steps.azure_deploy.outputs.publicIPAddress}}
       resourceGroupName: ${{steps.azure_deploy.outputs.resourceGroupName}}
+
+      # TODO: checkout the correct release or branch
+      # copy that to the controller
     steps:
       - name: Checkout Repository
         uses: actions/checkout@master
