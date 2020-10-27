@@ -40,7 +40,9 @@ echo ">>> cmd: $CMD"; $CMD; if [[ $? != 0 ]]; then echo ">>> ERROR: $scriptName:
 # Ansible & Ansible-Solace
 
 CMD="sudo -H python3 -m pip install 'ansible>=2.9.11,<2.10.0'"; 
-echo ">>> cmd: $CMD"; $CMD; if [[ $? != 0 ]]; then echo ">>> ERROR: $scriptName:$CMD."; exit 1; fi
+echo ">>> cmd: $CMD"; 
+sudo -H python3 -m pip install 'ansible>=2.9.11,<2.10.0'
+if [[ $? != 0 ]]; then echo ">>> ERROR: $scriptName:$CMD."; exit 1; fi
 
 CMD="sudo -H python3 -m pip install ansible-solace"; 
 echo ">>> cmd: $CMD"; $CMD; if [[ $? != 0 ]]; then echo ">>> ERROR: $scriptName:$CMD."; exit 1; fi

@@ -114,7 +114,7 @@ jobs:
 
       - name: Run Bootstrap
         run: |
-          ssh controller "./bootstrap.sh"
+          ssh controller "./bootstrap.sh > ./bootstrap.sh.log"
       
       # - name: Show Job Outputs
       #   run: |
