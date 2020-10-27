@@ -60,7 +60,7 @@ jobs:
         env:
           # PUBLIC_KEY: ${{ secrets.CONTROLLER_VM_PUBLIC_KEY }}
           # PUBLIC_KEY: "hello-world"  
-          PUBLIC_KEY: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCoii+97+HRgAP8I8cQEdJ9B4XapMS/OIH4N080aGaiQiN8FUff1569iUIdWSuSjCYdGIsjeSXMzXXlR+WPj0IpAWmKcwkqBJoKdJzH+jXJSWgcXwEZCQDUbZukBBHXvXyI8a5AA0KPoD2l1C+FIHWKEvNlw4zl0aHdikQ357iygbSbmuGjxPa8CoYYTPGz+gU1pIQSbXxiKgJrTfJPP4LZaPD11rWQLm14vKH/edH6OADdfURn9XWY87qTIYfjs7thyYw7TiG3xeMISngPmQIcjV+RPuPUHjQfnIdae8W5KRytJudq2g2FREoTo2bxzUPXc2IKmA0vcXohQrR3rkA8p0Xv+Alq1WoLGJZqYNRndGTc6m8prc+WsRs8KcQzdc+vvm/3IWqkU0793uGuE2+uNHtslNpFt0/3JWEWMpQHLwnJdUuN3xRp4e38SBr/1eDAtFgG4PnsnvArNigXmA9zZUr+iGAKfuamGJpQ8NhCE5iNvweVLv6N8ZT2QUgsRWM= rjgu@Ricardos-MacBook-Pro.local"
+          # PUBLIC_KEY: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCoii+97+HRgAP8I8cQEdJ9B4XapMS/OIH4N080aGaiQiN8FUff1569iUIdWSuSjCYdGIsjeSXMzXXlR+WPj0IpAWmKcwkqBJoKdJzH+jXJSWgcXwEZCQDUbZukBBHXvXyI8a5AA0KPoD2l1C+FIHWKEvNlw4zl0aHdikQ357iygbSbmuGjxPa8CoYYTPGz+gU1pIQSbXxiKgJrTfJPP4LZaPD11rWQLm14vKH/edH6OADdfURn9XWY87qTIYfjs7thyYw7TiG3xeMISngPmQIcjV+RPuPUHjQfnIdae8W5KRytJudq2g2FREoTo2bxzUPXc2IKmA0vcXohQrR3rkA8p0Xv+Alq1WoLGJZqYNRndGTc6m8prc+WsRs8KcQzdc+vvm/3IWqkU0793uGuE2+uNHtslNpFt0/3JWEWMpQHLwnJdUuN3xRp4e38SBr/1eDAtFgG4PnsnvArNigXmA9zZUr+iGAKfuamGJpQ8NhCE5iNvweVLv6N8ZT2QUgsRWM= rjgu@Ricardos-MacBook-Pro.local"
         run: |
           parametersJson=$(cat ${PARAMTERS_TEMPLATE_FILE} | jq .)
           echo parametersJson=$parametersJson
@@ -70,8 +70,8 @@ jobs:
             parametersJson=$( echo $parametersJson | jq -r '.parameters.zone.value=env.zone' )
           export vm_admin_username=${{github.event.inputs.vm_admin_username}}
             parametersJson=$( echo $parametersJson | jq -r '.parameters.vm_admin_username.value=env.vm_admin_username' )
-          export vm_admin_public_key="${PUBLIC_KEY}"
-            parametersJson=$( echo $parametersJson | jq -r '.parameters.vm_admin_public_key=env.vm_admin_public_key' )
+          # export vm_admin_public_key="${PUBLIC_KEY}"
+          #   parametersJson=$( echo $parametersJson | jq -r '.parameters.vm_admin_public_key=env.vm_admin_public_key' )
 
           echo $parametersJson | jq . > ${PARAMETERS_FILE}    
 
@@ -104,7 +104,7 @@ jobs:
             --name "${{ env.PROJECT_PREFIX }}_Deployment" \
             --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
             --template-file ${{ env.AZURE_DEPLOY_ARM_TEMPLATE }} \
-            --parameters ${{ env.PARAMETERS_FILE }} \
+            --parameters ${{ env.PARAMETERS_FILE }} vm_admin_public_key="${{ secrets.CONTROLLER_VM_PUBLIC_KEY }}" \
             --verbose  
 
 

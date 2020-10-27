@@ -10,9 +10,6 @@
         },
         "vm_admin_username": {
             "value": "{username}"
-        },
-        "vm_admin_public_key": {
-            "value": "{public-key}"
         }
     }
 }
