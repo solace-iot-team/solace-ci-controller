@@ -24,9 +24,9 @@ on:
           required: true
           default: "controller"
       release_tag:
-          description: "release tag to test"
+          description: "release tag number to test, ex. 'v'"
           required: true
-          default: "v0.0.4"
+          default: "0.0.5"
 env:
   PROJECT_PREFIX: '${{github.event.inputs.controller_id}}-solace-ci-controller'
   AZURE_RESOURCE_GROUP: '${{github.event.inputs.controller_id}}-solace-ci-controller-rg'
@@ -136,7 +136,7 @@ jobs:
               rm -rf ~/release && \
               mkdir -p ~/release && \
               cd ~/release && \
-              curl -L https://github.com/solace-iot-team/${REPO_NAME}/archive/${{ github.event.inputs.release_tag }}.zip --output release.${{ github.event.inputs.release_tag }}.zip  && \
+              curl -L https://github.com/solace-iot-team/${REPO_NAME}/archive/v${{ github.event.inputs.release_tag }}.zip --output release.${{ github.event.inputs.release_tag }}.zip  && \
               unzip release.${{ github.event.inputs.release_tag }}.zip    
           "
 
@@ -144,7 +144,7 @@ jobs:
         run: |
           echo "run a script which does all the prep, like keys, download solace, etc."
 
-      - name: Controller - Start Test
+      - name: Controller - Run Infrastructure Setup
         env:
           REPO_NAME: solace-ci-controller
         run: |
@@ -156,7 +156,16 @@ jobs:
       # TODO:
       # don't fail but check exit code
       # if not ok: pull down all the log files
-      # if ok: get the badge 
+
+      - name: Controller - ERROR - Download Infrastructure Setup Logs 
+        env:
+          REPO_NAME: solace-ci-controller
+        run: |
+          rm -rf ./remote-logs 
+          mkdir -p ./remote-logs
+          sftp -p controller:release/solace-ci-controller-${{ github.event.inputs.release_tag }}/azure/.test/infra/logs/* ./remote_logs
+      
+      # if ok: get the badge, otherwise failed
 
 ###
 # The End.
