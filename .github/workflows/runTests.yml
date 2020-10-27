@@ -3,7 +3,7 @@
 # Copyright (c) 2020, Solace Corporation, Ricardo Gomez-Ulmke (ricardo.gomez-ulmke@solace.com)
 # ---------------------------------------------------------------------------------------------
 
-name: Standup Azure Controller
+name: Run Tests
 on:
   workflow_dispatch:
     inputs:
@@ -34,7 +34,7 @@ env:
   BOOTSTRAP_SH: ./azure/.workflows/bootstrap.sh
 
 jobs:
-  create_vm:
+  run_tests:
     runs-on: ubuntu-18.04
     outputs:
       publicIpAddress: ${{steps.azure_deploy.outputs.publicIPAddress}}
@@ -96,7 +96,7 @@ jobs:
           SSH_KEY: ${{ secrets.CONTROLLER_VM_PRIVATE_KEY }}
           SSH_HOST: ${{ steps.azure_deploy.outputs.publicIPAddress }}
 
-      - name: Copy bootstrap script
+      - name: Controller - Copy bootstrap script
         # https://github.com/garygrossgarten/github-action-scp
         # no error handling: workflow will not fail on error
         uses: garygrossgarten/github-action-scp@release
@@ -107,15 +107,11 @@ jobs:
           username: ${{ github.event.inputs.vm_admin_username }}
           privateKey: ${{ secrets.CONTROLLER_VM_PRIVATE_KEY }}
 
-      # - name: ZZ
-      #   run: |
-      #     ssh controller "ls -la && pwd"
-
-      - name: Set Bootstrap to Executable
+      - name: Controller - Set Bootstrap to Executable
         run: |
           ssh controller "chmod u+x bootstrap.sh"
 
-      - name: Run Bootstrap
+      - name: Controller - Run Bootstrap
         run: |
           ssh controller "./bootstrap.sh > ./bootstrap.sh.log"
       
@@ -129,43 +125,26 @@ jobs:
       #     echo "${{toJson(steps.azure_deploy.outputs)}}"
 
 
-
-          
-
       - name: Controller - Get Release
+        env:
+          REPO_NAME: solace-ci-controller
         run: |
           ssh controller "\
+              rm -rf ~/release && \
               mkdir -p ~/release && \
               cd ~/release && \
-              curl -L https://github.com/solace-iot-team/solace-ci-controller/archive/${{ github.event.inputs.release_tag }}.zip --output release.${{ github.event.inputs.release_tag }}.zip  && \
+              curl -L https://github.com/solace-iot-team/${REPO_NAME}/archive/${{ github.event.inputs.release_tag }}.zip --output release.${{ github.event.inputs.release_tag }}.zip  && \
               unzip release.${{ github.event.inputs.release_tag }}.zip    
-
-          
           "
 
-      # RELEASE_TAG="v0.0.1"
-      # curl -L https://github.com/solace-iot-team/solace-ci-controller/archive/v0.0.1.zip --output release.v0.0.1.zip
-
-      # curl https://github.com/solace-iot-team/solace-ci-controller/releases/tag/v0.0.1
-
-      # ssh controller "mkdir ~/release && cd ~/release && curl --silent 'https://github.com/solace-iot-team/solace-ci-controller/releases/latest'"
-      
-      #   mkdir ~/release > /dev/null 2>&1
-      #   cd ~/release
-      #   curl --silent "https://github.com/solace-iot-team/solace-ci-controller/releases/latest"
-
-        
-      #   releaseDir="$scriptDir/release"
-      #   releaseProject="solace-int-rdp-az-funcs"
-      #   gitReleaseURL="https://api.github.com/repos/solace-iot-team/$releaseProject/releases"
-
-      #   resp=$(curl \
-      #       --silent \
-      #       -H "Accept: application/vnd.github.v3+json" \
-      #       "$gitReleaseURL/latest"
-      #       )
-      #       if [[ $? != 0 ]]; then echo " >>> ERR: get latest release info"; exit 1; fi
-
+      - name: Controller - Start Test
+        env:
+          REPO_NAME: solace-ci-controller
+        run: |
+          ssh controller "\
+              cd ~/release/${REPO_NAME}-* && \
+              ls -la  
+          "
 
 ###
 # The End.
