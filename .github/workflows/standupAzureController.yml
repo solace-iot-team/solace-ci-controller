@@ -74,11 +74,6 @@ jobs:
           template: ${{ env.AZURE_DEPLOY_ARM_TEMPLATE }}
           parameters: vm_admin_public_key="${{ secrets.CONTROLLER_VM_PUBLIC_KEY }}" id=${{ github.event.inputs.controller_id }} zone=${{ github.event.inputs.zone }} vm_admin_username=${{ github.event.inputs.vm_admin_username }}
       
-      # - name: "TEST: show the deploy output"
-      #   run: |
-      #     echo "outputs:"
-      #     echo "${{toJson(steps.azure_deploy.outputs)}}"
-
       - name: Configure SSH
         run: |
           mkdir -p ~/.ssh/
@@ -121,10 +116,15 @@ jobs:
         run: |
           ssh controller "./bootstrap.sh"
       
-      - name: Show Job Outputs
+      # - name: Show Job Outputs
+      #   run: |
+      #     echo "outputs:"
+      #     echo "${{toJson(jobs.create_vm.outputs)}}"
+
+      - name: "Show azure deploy outputs"
         run: |
-          echo "outputs:"
-          echo "${{toJson(jobs.create_vm.outputs)}}"
+          echo "${{toJson(steps.azure_deploy.outputs)}}"
+
 
 
 ###
