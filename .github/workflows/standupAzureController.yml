@@ -57,6 +57,8 @@ jobs:
       #     echo "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}"
       #     echo "github.token=${{ github.token }}"
       - name: Generate Parameters File
+        env:
+          PUBLIC_KEY: ${{ secrets.CONTROLLER_VM_PUBLIC_KEY }}
         run: |
           parametersJson=$(cat ${PARAMTERS_TEMPLATE_FILE} | jq .)
           echo parametersJson=$parametersJson
@@ -66,8 +68,8 @@ jobs:
             parametersJson=$( echo $parametersJson | jq -r '.parameters.zone.value=env.zone' )
           export vm_admin_username=${{github.event.inputs.vm_admin_username}}
             parametersJson=$( echo $parametersJson | jq -r '.parameters.vm_admin_username.value=env.vm_admin_username' )
-          # export vm_admin_public_key="${{ secrets.CONTROLLER_VM_PUBLIC_KEY }}"
-          #   parametersJson=$( echo $parametersJson | jq -r '.parameters.vm_admin_public_key=env.vm_admin_public_key' )
+          # export vm_admin_public_key="$PUBLIC_KEY"
+            parametersJson=$( echo $parametersJson | jq -r '.parameters.vm_admin_public_key="env.PUBLIC_KEY"' )
 
           echo $parametersJson | jq . > ${PARAMETERS_FILE}    
 
