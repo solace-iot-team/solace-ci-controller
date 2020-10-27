@@ -121,10 +121,40 @@ jobs:
       #     echo "outputs:"
       #     echo "${{toJson(jobs.create_vm.outputs)}}"
 
-      - name: "Show azure deploy outputs"
-        run: |
-          echo "${{toJson(steps.azure_deploy.outputs)}}"
+      # - name: "Show azure deploy outputs"
+      #   run: |
+      #     echo "${{toJson(steps.azure_deploy.outputs)}}"
 
+      - name: Controller - Get Release
+        run: |
+          ssh controller "\
+              mkdir ~/release && \
+              cd ~/release
+          
+          "
+
+      # RELEASE_TAG="v0.0.1"
+      # curl -L https://github.com/solace-iot-team/solace-ci-controller/archive/v0.0.1.zip --output release.v0.0.1.zip
+
+      # curl https://github.com/solace-iot-team/solace-ci-controller/releases/tag/v0.0.1
+
+      # ssh controller "mkdir ~/release && cd ~/release && curl --silent 'https://github.com/solace-iot-team/solace-ci-controller/releases/latest'"
+      
+      #   mkdir ~/release > /dev/null 2>&1
+      #   cd ~/release
+      #   curl --silent "https://github.com/solace-iot-team/solace-ci-controller/releases/latest"
+
+        
+      #   releaseDir="$scriptDir/release"
+      #   releaseProject="solace-int-rdp-az-funcs"
+      #   gitReleaseURL="https://api.github.com/repos/solace-iot-team/$releaseProject/releases"
+
+      #   resp=$(curl \
+      #       --silent \
+      #       -H "Accept: application/vnd.github.v3+json" \
+      #       "$gitReleaseURL/latest"
+      #       )
+      #       if [[ $? != 0 ]]; then echo " >>> ERR: get latest release info"; exit 1; fi
 
 
 ###
