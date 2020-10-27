@@ -106,6 +106,7 @@ jobs:
           local: ${{ env.BOOTSTRAP_SH }}
           remote: bootstrap.sh
           host: ${{ steps.azure_deploy.outputs.publicIPAddress }}
+          username: ${{ github.event.inputs.vm_admin_username }}
           privateKey: ${{ secrets.CONTROLLER_VM_PRIVATE_KEY }}
 
       - name: test
