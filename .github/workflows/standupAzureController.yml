@@ -109,28 +109,28 @@ jobs:
           username: ${{ github.event.inputs.vm_admin_username }}
           privateKey: ${{ secrets.CONTROLLER_VM_PRIVATE_KEY }}
 
-      - name: test 1
+      - name: ZZ
         run: |
           ssh controller "ls -la && pwd"
 
-      # - name: test 2
+      - name: XX
+        run: |
+          ssh controller "chmod u+x bootstrap.sh"
+
+      - name: YY
+        run: |
+          ssh controller "./bootstrap.sh"
+
+      # - name: Execute bootstrap script
       #   run: |
       #     ssh controller 
-      #     " \
-      #       ls -la && \
-      #       pwd \
+      #     "\
+      #       chmod u+x bootstrap.sh && \
+      #       ./bootstrap.sh \
       #     "
 
-      - name: Execute bootstrap script
-        run: |
-          ssh controller 
-          "\
-            chmod u+x bootstrap.sh && \
-            ./bootstrap.sh \
-          "
-
-      - name: "DEBUG: STOP WORKFLOW"
-        run: exit 1
+      # - name: "DEBUG: STOP WORKFLOW"
+      #   run: exit 1
       
 
       # - name: Execute bootstrap script
