@@ -23,7 +23,10 @@ on:
           description: "vm admin username"
           required: true
           default: "controller"
-
+      release_tag:
+          description: "release tag to test"
+          required: true
+          default: "v0.1.0"
 env:
   PROJECT_PREFIX: '${{github.event.inputs.controller_id}}-solace-ci-controller'
   AZURE_RESOURCE_GROUP: '${{github.event.inputs.controller_id}}-solace-ci-controller-rg'
@@ -125,14 +128,17 @@ jobs:
       #   run: |
       #     echo "${{toJson(steps.azure_deploy.outputs)}}"
 
+
+
+          
+
       - name: Controller - Get Release
         run: |
           ssh controller "\
               mkdir -p ~/release && \
               cd ~/release && \
-              export RELEASE_TAG="v0.0.1" && \
-              curl -L https://github.com/solace-iot-team/solace-ci-controller/archive/$RELEASE_TAG.zip --output release.$RELEASE_TAG.zip  && \
-              unzip release.$RELEASE_TAG.zip    
+              curl -L https://github.com/solace-iot-team/solace-ci-controller/archive/${{ github.event.inputs.release_tag }}.zip --output release.${{ github.event.inputs.release_tag }}.zip  && \
+              unzip release.${{ github.event.inputs.release_tag }}.zip    
 
           
           "
