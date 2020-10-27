@@ -66,14 +66,14 @@ jobs:
             parametersJson=$( echo $parametersJson | jq -r '.parameters.zone.value=env.zone' )
           export vm_admin_username=${{github.event.inputs.vm_admin_username}}
             parametersJson=$( echo $parametersJson | jq -r '.parameters.vm_admin_username.value=env.vm_admin_username' )
-          export vm_admin_public_key="${{ secrets.CONTROLLER_VM_PUBLIC_KEY }}"
-            parametersJson=$( echo $parametersJson | jq -r '.parameters.vm_admin_public_key=env.vm_admin_public_key' )
+          # export vm_admin_public_key="${{ secrets.CONTROLLER_VM_PUBLIC_KEY }}"
+          #   parametersJson=$( echo $parametersJson | jq -r '.parameters.vm_admin_public_key=env.vm_admin_public_key' )
 
           echo $parametersJson | jq . > ${PARAMETERS_FILE}    
 
-      # - name: Show Parameters File
-      #   run: |
-      #     cat ${PARAMETERS_FILE}
+      - name: Show Parameters File
+        run: |
+          cat ${PARAMETERS_FILE}
 
       - name: Azure Login
         # https://github.com/marketplace/actions/azure-login
@@ -96,14 +96,14 @@ jobs:
       - name: Run ARM Deploy
         id: azure_deploy
         # https://github.com/marketplace/actions/deploy-azure-resource-manager-arm-template
-        uses: azure/arm-deploy@v1
+        uses: azure/arm-deploy@v1.0.1
         with:
           subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           resourceGroupName: ${{ env.AZURE_RESOURCE_GROUP }}
           template: ${{ env.AZURE_DEPLOY_ARM_TEMPLATE }}
-          parameters: id=${{ github.event.inputs.controller_id }} zone=${{ github.event.inputs.zone }} vm_admin_username=${{ github.event.inputs.vm_admin_username }} vm_admin_public_key='${{ github.event.inputs.vm_pub_key }}'
+          # parameters: id=${{ github.event.inputs.controller_id }} zone=${{ github.event.inputs.zone }} vm_admin_username=${{ github.event.inputs.vm_admin_username }} vm_admin_public_key='${{ github.event.inputs.vm_pub_key }}'
           # parameters: id=${{ github.event.inputs.controller_id }} zone=${{ github.event.inputs.zone }} vm_admin_username=${{ github.event.inputs.vm_admin_username }} vm_admin_public_key='${{ secrets.CONTROLLER_VM_PUBLIC_KEY }}'
-          # parameters: ${{env.PARAMETERS_FILE}}
+          parameters: ${{env.PARAMETERS_FILE}}
 
       - name: "TEST: show the deploy output"
         run: |
