@@ -156,6 +156,8 @@ jobs:
       # TODO:
       # don't fail but check exit code
       # if not ok: pull down all the log files
+      # set artefacts 
+      # exit the workflow: run: exit 1
 
       - name: Controller - ERROR - Download Infrastructure Setup Logs 
         env:
