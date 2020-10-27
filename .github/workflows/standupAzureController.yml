@@ -58,7 +58,8 @@ jobs:
       #     echo "github.token=${{ github.token }}"
       - name: Generate Parameters File
         env:
-          PUBLIC_KEY: ${{ secrets.CONTROLLER_VM_PUBLIC_KEY }}
+          # PUBLIC_KEY: ${{ secrets.CONTROLLER_VM_PUBLIC_KEY }}
+          PUBLIC_KEY: "hello-world"  
         run: |
           parametersJson=$(cat ${PARAMTERS_TEMPLATE_FILE} | jq .)
           echo parametersJson=$parametersJson
