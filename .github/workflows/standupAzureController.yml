@@ -112,14 +112,11 @@ jobs:
       - name: test
         run: |
           ssh controller 
-          "
-            ls -la && 
-            pwd
+          " \
+            ls -la && \
+            pwd \
           "
 
-      - name: "DEBUG: STOP WORKFLOW"
-        run: exit 1
-      
       - name: Execute bootstrap script
         run: |
           ssh controller 
@@ -128,6 +125,9 @@ jobs:
             ./bootstrap.sh \
           "
 
+      - name: "DEBUG: STOP WORKFLOW"
+        run: exit 1
+      
 
       # - name: Execute bootstrap script
       # # https://blog.benoitblanchon.fr/github-action-run-ssh-commands/
