@@ -42,7 +42,7 @@ env:
   TEST_LOCATION: "westeurope"
   TEST_ZONE: "1"
   TEST_VM_ADMIN_USERNAME: "controller"
-  TEST_AZURE_PROJECT: "sol-ci-ctrller"
+  TEST_AZURE_PROJECT: "solace-ctrller"
   TEST_AZURE_DEPLOY_ARM_TEMPLATE: "./azure/.workflows/azure-deploy.json"
   TEST_BOOTSTRAP_SH: "./azure/.workflows/bootstrap.sh"
 
@@ -78,6 +78,12 @@ jobs:
         uses: actions/checkout@master
         with: 
           ref: ${{ github.ref }}
+
+      - name: List Workspace
+        run: |
+          cd $GITHUB_WORKSPACE
+          ls -la 
+          cd
 
       - name: Azure Login
         # https://github.com/marketplace/actions/azure-login
