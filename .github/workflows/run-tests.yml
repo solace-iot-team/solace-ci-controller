@@ -11,8 +11,9 @@ on:
   pull_request: 
     types: [opened, reopened]
     branches:
-      - master  
-  # TODO: also run tests on new release
+      - main  
+  release:
+    types: [published]
 env:
 
   TEST_CONTROLLER_ID: "wft-azperf"
