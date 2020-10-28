@@ -22,9 +22,9 @@ env:
   TEST_AZURE_PROJECT: "solace-ctrller"
   TEST_AZURE_DEPLOY_ARM_TEMPLATE: "./azure/.workflows/azure-deploy.json"
   TEST_BOOTSTRAP_SH: "./azure/.workflows/bootstrap.sh"
-  TEST_REMOTE_ASSETS_DIR: ~/remote-assets
-  TEST_REMOTE_ASSETS_INFRA_DIR: infra
-  TEST_CONTROLLER_REPO_DIR: ~/${{ github.repository }}/${{ github.ref }} 
+  TEST_RUNNER_ASSETS_DIR: ~/remote-assets
+  TEST_RUNNER_ASSETS_INFRA_DIR: infra
+  TEST_CONTROLLER_REPO_DIR: ${{ github.repository }}/${{ github.ref }} 
   TEST_REPO_INFRA_DIR: azure/.test/infra
   TEST_REPO_INFRA_LOGS_DIR: logs
   TEST_REPO_INFRA_APPLY_SCRIPT: run.apply.fg.sh
@@ -166,7 +166,7 @@ jobs:
         run: |
           echo "run a script which does all the prep, like keys, link solace, etc."
 
-      - name: Controller - Run Infra Apply
+      - name: Controller - Infra Apply - Run
         run: |
           ssh controller "\
               cd "${TEST_CONTROLLER_REPO_DIR}/${TEST_REPO_INFRA_DIR}" && \
@@ -174,20 +174,19 @@ jobs:
           "
         continue-on-error: true
         # timeout-minutes: 120
-  
+    
       - name: Controller - Infra Apply - Download Logs 
         env:
           SSH_USER: ${{ env.TEST_VM_ADMIN_USERNAME }}
           REPO_LOGS_DIR: ${{ env.TEST_CONTROLLER_REPO_DIR }}/${{ env.TEST_REPO_INFRA_DIR }}/${{ env.TEST_REPO_INFRA_LOGS_DIR }}
-          RUNNER_ASSET_DIR: ./${{ env.TEST_REMOTE_ASSETS_DIR }}/${{ env.TEST_REMOTE_ASSETS_INFRA_DIR }}/${{ env.TEST_REPO_INFRA_LOGS_DIR }}
+          RUNNER_ASSET_DIR: ./${{ env.TEST_RUNNER_ASSETS_DIR }}/${{ env.TEST_RUNNER_ASSETS_INFRA_DIR }}/${{ env.TEST_REPO_INFRA_LOGS_DIR }}
         run: |
-          rm -rf ./${TEST_REMOTE_ASSETS_DIR}
-          mkdir -p ./${TEST_REMOTE_ASSETS_DIR}/${TEST_REMOTE_ASSETS_INFRA_DIR}
+          mkdir -p ./${TEST_RUNNER_ASSETS_DIR}/${TEST_RUNNER_ASSETS_INFRA_DIR}
           sftp -p ${SSH_USER}:${REPO_LOGS_DIR}/* ${LOCAL_ASSET_DIR}
 
       - name: Archive Infra Apply logs
         env:
-          RUNNER_ASSET_DIR: ./${{ env.TEST_REMOTE_ASSETS_DIR }}/${{ env.TEST_REMOTE_ASSETS_INFRA_DIR }}/${{ env.TEST_REPO_INFRA_LOGS_DIR }}
+          RUNNER_ASSET_DIR: ./${{ env.TEST_RUNNER_ASSETS_DIR }}/${{ env.TEST_RUNNER_ASSETS_INFRA_DIR }}/${{ env.TEST_REPO_INFRA_LOGS_DIR }}
         uses: actions/upload-artifact@v2
         with:
           name: infra-apply-logs
