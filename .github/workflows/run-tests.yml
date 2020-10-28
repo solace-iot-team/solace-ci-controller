@@ -42,6 +42,10 @@ env:
   TEST_LOCATION: "westeurope"
   TEST_ZONE: "1"
   TEST_VM_ADMIN_USERNAME: "controller"
+  TEST_AZURE_PROJECT_TAG_POST: "-sol-ci-ctrller"
+  TEST_AZURE_RESOURCE_GROUP_POST: "-sol-ci-ctrller-rg"
+  TEST_AZURE_DEPLOY_ARM_TEMPLATE: ./azure/.workflows/azure-deploy.json
+  TEST_BOOTSTRAP_SH: ./azure/.workflows/bootstrap.sh
 
 jobs:
   run_tests:
@@ -49,19 +53,9 @@ jobs:
     outputs:
       publicIpAddress: ${{ steps.azure_deploy.outputs.publicIPAddress }}
       resourceGroupName: ${{ steps.azure_deploy.outputs.resourceGroupName }}
-    env:  
-      # TEST_AZURE_PROJECT_TAG: ${{ env.TEST_CONTROLLER_ID }}-sol-ci-ctrller
-      # TEST_AZURE_RESOURCE_GROUP: ${{ env.TEST_CONTROLLER_ID }}-sol-ci-ctrller-rg
-      TEST_AZURE_DEPLOY_ARM_TEMPLATE: ./azure/.workflows/azure-deploy.json
-      TEST_BOOTSTRAP_SH: ./azure/.workflows/bootstrap.sh
 
     steps:
 
-      - name: Dump Job Context
-        env:
-          JOB_CONTEXT: ${{ toJson(job) }}
-        run: echo "$JOB_CONTEXT"
-      
       - name: Print test env
         run: |
           env | grep TEST
