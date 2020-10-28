@@ -111,9 +111,6 @@ jobs:
           template: ${{ env.TEST_AZURE_DEPLOY_ARM_TEMPLATE }}
           parameters: vm_admin_public_key="${{ secrets.CONTROLLER_VM_PUBLIC_KEY }}" project_prefix=${{ env.TEST_CONTROLLER_ID }}-${{ env.TEST_AZURE_PROJECT }} zone=${{ env.TEST_ZONE }} vm_admin_username=${{ env.TEST_VM_ADMIN_USERNAME }}
       
-      - name: DEBUG - end fail
-        run: exit 1    
-      
       - name: Configure SSH
         run: |
           mkdir -p ~/.ssh/
@@ -129,7 +126,7 @@ jobs:
           chmod 600 ~/.ssh/config
           # cat ~/.ssh/config
         env:
-          SSH_USER: ${{ github.event.inputs.vm_admin_username }}
+          SSH_USER: ${{ env.TEST_VM_ADMIN_USERNAME }}
           SSH_KEY: ${{ secrets.CONTROLLER_VM_PRIVATE_KEY }}
           SSH_HOST: ${{ steps.azure_deploy.outputs.publicIPAddress }}
 
@@ -138,10 +135,10 @@ jobs:
         # no error handling: workflow will not fail on error
         uses: garygrossgarten/github-action-scp@release
         with:
-          local: ${{ env.BOOTSTRAP_SH }}
+          local: ${{ env.TEST_BOOTSTRAP_SH }}
           remote: bootstrap.sh
           host: ${{ steps.azure_deploy.outputs.publicIPAddress }}
-          username: ${{ github.event.inputs.vm_admin_username }}
+          username: ${{ env.TEST_VM_ADMIN_USERNAME }}
           privateKey: ${{ secrets.CONTROLLER_VM_PRIVATE_KEY }}
 
       - name: Controller - Set Bootstrap to Executable
@@ -152,6 +149,10 @@ jobs:
         run: |
           ssh controller "./bootstrap.sh > ./bootstrap.sh.log"
       
+      - name: DEBUG - end fail
+        run: exit 1    
+      
+
       # - name: Show Job Outputs
       #   run: |
       #     echo "outputs:"
