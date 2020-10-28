@@ -43,8 +43,8 @@ env:
   TEST_ZONE: "1"
   TEST_VM_ADMIN_USERNAME: "controller"
 
-  TEST_AZURE_PROJECT_TAG: "${ AZURE_CONTROLLER_ID }-sol-ci-ctrller"
-  TEST_AZURE_RESOURCE_GROUP: "${ AZURE_CONTROLLER_ID }-sol-ci-ctrller-rg"
+  TEST_AZURE_PROJECT_TAG: "${ TEST_CONTROLLER_ID }-sol-ci-ctrller"
+  TEST_AZURE_RESOURCE_GROUP: "${ TEST_CONTROLLER_ID }-sol-ci-ctrller-rg"
   TEST_AZURE_DEPLOY_ARM_TEMPLATE: ./azure/.workflows/azure-deploy.json
   TEST_BOOTSTRAP_SH: ./azure/.workflows/bootstrap.sh
 
