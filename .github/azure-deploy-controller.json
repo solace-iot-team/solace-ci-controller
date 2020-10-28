@@ -3,16 +3,10 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "id": {
+        "project_prefix": {
             "type": "string",
             "metadata": {
                 "description": "The project prefix. Must be unique in AZ Subscription."
-            }
-        },
-        "azLocation": {
-            "type": "string",
-            "metadata": {
-                "description": "The Azure location."
             }
         },
         "zone": {
@@ -32,12 +26,6 @@
                 "description": "The admin user name of the VM"
             }
         },
-        // "vm_admin_password": {
-        //     "type": "string",
-        //     "metadata": {
-        //         "description": "The admin password of the VM"
-        //     }
-        // }
         "vm_admin_public_key": {
             "type": "string",
             "metadata": {
@@ -46,14 +34,13 @@
         }
     },
     "variables": {
-        "projectPrefix": "[concat(parameters('id'), '-solace-ci-controller')]",
-        "networkSecurityGroups_controller_SecGroupNet_name": "[concat(variables('projectPrefix'), '-SecGroupNet')]",
-        "publicIPAddresses_controller_vmPublicIP_name": "[concat(variables('projectPrefix'), '-vmPublicIP')]",
-        "virtualNetworks_controller_vNet_name": "[concat(variables('projectPrefix'), '-vNet')]",
-        "virtualNetworks_controller_vNet_subNet_name": "[concat(variables('projectPrefix'), '-vNet-subNet')]",
-        "virtualMachines_controller_vm_name": "[concat(variables('projectPrefix'), '-vm')]",
-        "networkInterfaces_controller_vmNetInt_name": "[concat(variables('projectPrefix'), '-vmNetInt')]",
-        "disks_controller_vm_os_disk_name": "[concat(variables('projectPrefix'), '-vmOsDisk')]"
+        "networkSecurityGroups_controller_SecGroupNet_name": "[concat(parameters('project_prefix'), '-SecGroupNet')]",
+        "publicIPAddresses_controller_vmPublicIP_name": "[concat(parameters('project_prefix'), '-vmPublicIP')]",
+        "virtualNetworks_controller_vNet_name": "[concat(parameters('project_prefix'), '-vNet')]",
+        "virtualNetworks_controller_vNet_subNet_name": "[concat(parameters('project_prefix'), '-vNet-subNet')]",
+        "virtualMachines_controller_vm_name": "[concat(parameters('project_prefix'), '-vm')]",
+        "networkInterfaces_controller_vmNetInt_name": "[concat(parameters('project_prefix'), '-vmNetInt')]",
+        "disks_controller_vm_os_disk_name": "[concat(parameters('project_prefix'), '-vmOsDisk')]"
     },
     "resources": [
         {
@@ -229,9 +216,7 @@
                 "osProfile": {
                     "computerName": "[variables('virtualMachines_controller_vm_name')]",
                     "adminUsername": "[parameters('vm_admin_username')]",
-                    // "adminPassword": "[parameters('vm_admin_password')]",
                     "linuxConfiguration": {
-                        // "disablePasswordAuthentication": false,
                         "disablePasswordAuthentication": true,
                         "ssh": {
                             "publicKeys": [
@@ -261,18 +246,9 @@
             "type": "string",  
             "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddresses_controller_vmPublicIP_name'))).IpAddress]"
         },
-        "loginSSH": {
+        "resourceGroupName": {
             "type": "string",
-            "value": "[concat(
-                'ssh ',
-                reference(resourceId('Microsoft.Compute/virtualMachines', variables('virtualMachines_controller_vm_name'))).osProfile.adminUsername,
-                '@',
-                reference(resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddresses_controller_vmPublicIP_name'))).IpAddress
-            )]"
-        },
-        "loginPassword": {
-            "type": "string",
-            "value": "[parameters('vm_admin_password')]"
+            "value": "[resourceGroup().name]"
         }
     }
 }
