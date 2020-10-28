@@ -3,39 +3,50 @@
 # Copyright (c) 2020, Solace Corporation, Ricardo Gomez-Ulmke (ricardo.gomez-ulmke@solace.com)
 # ---------------------------------------------------------------------------------------------
 
-name: Run Tests - new 
+name: Run Tests
 on:
-  workflow_dispatch:
-    inputs:
-      new_input:
-          description: "testing new input in branch"
-          required: true
-          default: hello
-      controller_id:
-          description: "unique controller id"
-          required: true
-          default: w1
-      azure_location:
-          description: "azure location / region"
-          required: true
-          default: "westeurope"
-      zone:
-          description: "azure availability zone"
-          required: true
-          default: "1"
-      vm_admin_username:
-          description: "vm admin username"
-          required: true
-          default: "controller"
-      release_tag:
-          description: "release tag number to test, ex. 'v'"
-          required: true
-          default: "0.0.5"
+  push:
+    branches:
+      - feature-wf-test-1
+  pull_request: 
+    types: [opened, reopened]
+    branches:
+      - master  
+  # TODO: also run tests on new release
+# on:
+#   workflow_dispatch:
+#     inputs:
+#       controller_id:
+#           description: "unique controller id"
+#           required: true
+#           default: w1
+#       azure_location:
+#           description: "azure location / region"
+#           required: true
+#           default: "westeurope"
+#       zone:
+#           description: "azure availability zone"
+#           required: true
+#           default: "1"
+#       vm_admin_username:
+#           description: "vm admin username"
+#           required: true
+#           default: "controller"
+#       release_tag:
+#           description: "release tag number to test, ex. 'v'"
+#           required: true
+#           default: "0.0.5"
 env:
-  PROJECT_PREFIX: '${{github.event.inputs.controller_id}}-solace-ci-controller'
-  AZURE_RESOURCE_GROUP: '${{github.event.inputs.controller_id}}-solace-ci-controller-rg'
-  AZURE_DEPLOY_ARM_TEMPLATE: ./azure/.workflows/azure-deploy.json
-  BOOTSTRAP_SH: ./azure/.workflows/bootstrap.sh
+
+  TEST_CONTROLLER_ID: "wft-azperf"
+  TEST_LOCATION: "westeurope"
+  TEST_ZONE: "1"
+  TEST_VM_ADMIN_USERNAME: "controller"
+
+  TEST_AZURE_PROJECT_TAG: "${ AZURE_CONTROLLER_ID }-sol-ci-ctrller"
+  TEST_AZURE_RESOURCE_GROUP: "${ AZURE_CONTROLLER_ID }-sol-ci-ctrller-rg"
+  TEST_AZURE_DEPLOY_ARM_TEMPLATE: ./azure/.workflows/azure-deploy.json
+  TEST_BOOTSTRAP_SH: ./azure/.workflows/bootstrap.sh
 
 jobs:
   run_tests:
@@ -44,22 +55,38 @@ jobs:
       publicIpAddress: ${{steps.azure_deploy.outputs.publicIPAddress}}
       resourceGroupName: ${{steps.azure_deploy.outputs.resourceGroupName}}
 
-      # TODO: checkout the correct release or branch
-      # copy that to the controller
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@master
-      # - name: "TESTS: List Env Vars after checkout"
-      #   run: |
-      #     pwd
-      #     ls -a
-      #     echo "GITHUB_SHA=$GITHUB_SHA"
-      #     echo "GITHUB_REPOSITORY=$GITHUB_REPOSITORY"
-      #     echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE"
-      #     echo "GITHUB_REF=$GITHUB_REF"
-      #     echo "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}"
-      #     echo "github.token=${{ github.token }}"
+      
+      - name: Print test env
+        run: |
+          env | grep TEST
 
+      - name: DEBUG - end fail
+        run: exit 1    
+
+      - name: Dump GitHub context
+        run: |
+          echo "entire 'github' object"  
+          echo "${{ toJson(github) }}"
+      
+      - name: Print github env before checkout
+        run: |
+          pwd
+          echo "GITHUB_SHA=$GITHUB_SHA"
+          echo "GITHUB_REPOSITORY=$GITHUB_REPOSITORY"
+          echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE"
+          echo "GITHUB_REF=$GITHUB_REF"
+          echo "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}"
+          echo "github.token=${{ github.token }}"
+      
+      - name: Checkout Current Branch
+        uses: actions/checkout@master
+        with: 
+          ref: ${{ github.ref }}
+
+      - name: DEBUG - end fail
+        run: exit 1    
+      
       - name: Azure Login
         # https://github.com/marketplace/actions/azure-login
         uses: azure/login@v1.1
@@ -82,7 +109,7 @@ jobs:
           subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           resourceGroupName: ${{ env.AZURE_RESOURCE_GROUP }}
           template: ${{ env.AZURE_DEPLOY_ARM_TEMPLATE }}
-          parameters: vm_admin_public_key="${{ secrets.CONTROLLER_VM_PUBLIC_KEY }}" id=${{ github.event.inputs.controller_id }} zone=${{ github.event.inputs.zone }} vm_admin_username=${{ github.event.inputs.vm_admin_username }}
+          parameters: vm_admin_public_key="${{ secrets.CONTROLLER_VM_PUBLIC_KEY }}" controller_id=${{ github.event.inputs.controller_id }} zone=${{ github.event.inputs.zone }} vm_admin_username=${{ github.event.inputs.vm_admin_username }}
       
       - name: Configure SSH
         run: |

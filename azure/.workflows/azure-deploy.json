@@ -3,10 +3,10 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "id": {
+        "controller_id": {
             "type": "string",
             "metadata": {
-                "description": "The container-id. Must be unique in AZ Subscription."
+                "description": "The controller-id. Must be unique in AZ Subscription."
             }
         },
         "zone": {
@@ -34,7 +34,7 @@
         }
     },
     "variables": {
-        "projectPrefix": "[concat(parameters('id'), '-solace-ci-controller')]",
+        "projectPrefix": "[concat(parameters('controller_id'), '-sol-ci-ctrller')]",
         "networkSecurityGroups_controller_SecGroupNet_name": "[concat(variables('projectPrefix'), '-SecGroupNet')]",
         "publicIPAddresses_controller_vmPublicIP_name": "[concat(variables('projectPrefix'), '-vmPublicIP')]",
         "virtualNetworks_controller_vNet_name": "[concat(variables('projectPrefix'), '-vNet')]",
