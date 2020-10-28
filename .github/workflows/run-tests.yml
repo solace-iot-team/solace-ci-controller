@@ -217,8 +217,6 @@ jobs:
         with:
           filename: .github/failed-test-template.md
 
-          https://github.com/solace-iot-team/solace-ci-controller/suites/1414745298/artifacts/23659360
-
       # start the test runs
       # download test-results
       # teardown infra
