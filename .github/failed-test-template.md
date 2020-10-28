@@ -4,9 +4,6 @@ assignees: ricardojosegomezulmke
 labels: bug
 ---
 
-* template variables: https://github.com/JasonEtco/actions-toolkit#toolscontext
-* dates with Moment.js: https://momentjs.com/docs/#/displaying/
-
 Tests failed.
 
 

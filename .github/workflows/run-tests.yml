@@ -20,8 +20,6 @@ env:
   TEST_ZONE: "1"
   TEST_VM_ADMIN_USERNAME: "controller"
   TEST_AZURE_PROJECT: "solace-ctrller"
-  # TEST_AZURE_DEPLOY_ARM_TEMPLATE: "./azure/.workflows/azure-deploy.json"
-  # TEST_BOOTSTRAP_SH: "./azure/.workflows/bootstrap.sh"
   TEST_AZURE_DEPLOY_ARM_TEMPLATE: ".github/azure-deploy-controller.json"
   TEST_BOOTSTRAP_SH: ".github/bootstrap-controller.sh"
   TEST_RUNNER_ASSETS_DIR: remote-assets
