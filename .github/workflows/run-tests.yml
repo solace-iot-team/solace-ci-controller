@@ -149,10 +149,6 @@ jobs:
         run: |
           ssh controller "./bootstrap.sh > ./bootstrap.sh.log"
       
-      - name: DEBUG - end fail
-        run: exit 1    
-      
-
       # - name: Show Job Outputs
       #   run: |
       #     echo "outputs:"
@@ -162,6 +158,24 @@ jobs:
       #   run: |
       #     echo "${{toJson(steps.azure_deploy.outputs)}}"
 
+      - name: Controller - Create Repo Directory
+        run: |
+          ssh controller "\
+              export REPO_DIR=~/$GITHUB_REPOSITORY/$GITHUB_REF
+              rm -rf $REPO_DIR && \
+              mkdir -p $REPO_DIR
+          "
+
+      - name: DEBUG - end fail
+        run: exit 1    
+      
+
+
+      - name: Copy Repo to Controller
+        # recursive from: $GITHUB_WORKSPACE
+        # to: ~/$GITHUB_REPOSITORY/$GITHUB_REF
+        #    ~/solace-iot-team/solace-ci-controller/refs/heads/feature-wf-test-1
+        #  do I need to mkdir this first?
 
       - name: Controller - Get Release
         env:
