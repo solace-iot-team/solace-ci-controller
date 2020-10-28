@@ -42,10 +42,9 @@ env:
   TEST_LOCATION: "westeurope"
   TEST_ZONE: "1"
   TEST_VM_ADMIN_USERNAME: "controller"
-  TEST_AZURE_PROJECT_TAG_POST: "-sol-ci-ctrller"
-  TEST_AZURE_RESOURCE_GROUP_POST: "-sol-ci-ctrller-rg"
-  TEST_AZURE_DEPLOY_ARM_TEMPLATE: ./azure/.workflows/azure-deploy.json
-  TEST_BOOTSTRAP_SH: ./azure/.workflows/bootstrap.sh
+  TEST_AZURE_PROJECT: "sol-ci-ctrller"
+  TEST_AZURE_DEPLOY_ARM_TEMPLATE: "./azure/.workflows/azure-deploy.json"
+  TEST_BOOTSTRAP_SH: "./azure/.workflows/bootstrap.sh"
 
 jobs:
   run_tests:
@@ -59,9 +58,6 @@ jobs:
       - name: Print test env
         run: |
           env | grep TEST
-
-      - name: DEBUG - end fail
-        run: exit 1    
 
       - name: Dump GitHub context
         run: |
@@ -83,9 +79,6 @@ jobs:
         with: 
           ref: ${{ github.ref }}
 
-      - name: DEBUG - end fail
-        run: exit 1    
-      
       - name: Azure Login
         # https://github.com/marketplace/actions/azure-login
         uses: azure/login@v1.1
@@ -94,11 +87,16 @@ jobs:
 
       - name: Create Azure Resource Group
         run: |
+          AZURE_RESOURCE_GROUP="${TEST_CONTROLLER_ID}-${TEST_AZURE_PROJECT}-rg"
+          AZURE_PROJECT_TAG="${TEST_CONTROLLER_ID}-${TEST_AZURE_PROJECT}"
           az group create \
-            --name ${AZURE_RESOURCE_GROUP} \
-            --location ${{github.event.inputs.azure_location}} \
-            --tags project=${PROJECT_PREFIX} \
+            --name $AZURE_RESOURCE_GROUP \
+            --location ${TEST_LOCATION} \
+            --tags project=$AZURE_PROJECT_TAG \
             --verbose
+      
+      - name: DEBUG - end fail
+        run: exit 1    
       
       - name: Run ARM Deploy
         id: azure_deploy
