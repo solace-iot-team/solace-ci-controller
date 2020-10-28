@@ -45,7 +45,7 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@master
-      # - name: "TESTS: List Files after checkout"
+      # - name: "TESTS: List Env Vars after checkout"
       #   run: |
       #     pwd
       #     ls -a
@@ -144,7 +144,7 @@ jobs:
         run: |
           echo "run a script which does all the prep, like keys, download solace, etc."
 
-      - name: Controller - Run Infrastructure Setup
+      - name: Controller - Run Infra Setup
         env:
           REPO_NAME: solace-ci-controller
         run: |
@@ -159,7 +159,7 @@ jobs:
       # set artefacts 
       # exit the workflow: run: exit 1
 
-      - name: Controller - ERROR - Download Infrastructure Setup Logs 
+      - name: Controller - ERROR - Infra Setup - Download Logs 
         env:
           REPO_NAME: solace-ci-controller
         run: |
@@ -167,7 +167,9 @@ jobs:
           mkdir -p ./remote-logs
           sftp -p controller:release/solace-ci-controller-${{ github.event.inputs.release_tag }}/azure/.test/infra/logs/* ./remote-logs
       
-      # if ok: get the badge, otherwise failed
+      # start the test runs
+      # download all data
+      # the teardown infra
 
 ###
 # The End.
