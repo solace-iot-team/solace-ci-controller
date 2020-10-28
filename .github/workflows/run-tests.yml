@@ -7,6 +7,10 @@ name: Run Tests - new
 on:
   workflow_dispatch:
     inputs:
+      new_input:
+          description: "testing new input in branch"
+          required: true
+          default: hello
       controller_id:
           description: "unique controller id"
           required: true
