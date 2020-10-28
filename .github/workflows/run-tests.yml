@@ -202,7 +202,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: infra-apply-logs
-          path: ${RUNNER_ASSET_DIR}/
+          path: ${{ env.RUNNER_ASSET_DIR }}
           if-no-files-found: error
             
       # - name: DEBUG - end fail
