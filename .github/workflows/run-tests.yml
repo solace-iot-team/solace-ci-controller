@@ -22,7 +22,7 @@ env:
   TEST_AZURE_PROJECT: "solace-ctrller"
   TEST_AZURE_DEPLOY_ARM_TEMPLATE: "./azure/.workflows/azure-deploy.json"
   TEST_BOOTSTRAP_SH: "./azure/.workflows/bootstrap.sh"
-  TEST_RUNNER_ASSETS_DIR: ~/remote-assets
+  TEST_RUNNER_ASSETS_DIR: remote-assets
   TEST_RUNNER_ASSETS_INFRA_DIR: infra
   TEST_CONTROLLER_REPO_DIR: ${{ github.repository }}/${{ github.ref }} 
   TEST_REPO_INFRA_DIR: azure/.test/infra
@@ -181,8 +181,8 @@ jobs:
           REPO_LOGS_DIR: ${{ env.TEST_CONTROLLER_REPO_DIR }}/${{ env.TEST_REPO_INFRA_DIR }}/${{ env.TEST_REPO_INFRA_LOGS_DIR }}
           RUNNER_ASSET_DIR: ./${{ env.TEST_RUNNER_ASSETS_DIR }}/${{ env.TEST_RUNNER_ASSETS_INFRA_DIR }}/${{ env.TEST_REPO_INFRA_LOGS_DIR }}
         run: |
-          mkdir -p ./${TEST_RUNNER_ASSETS_DIR}/${TEST_RUNNER_ASSETS_INFRA_DIR}
-          sftp -p ${SSH_USER}:${REPO_LOGS_DIR}/* ${LOCAL_ASSET_DIR}
+          mkdir -p ./${RUNNER_ASSET_DIR}
+          sftp -p ${SSH_USER}:${REPO_LOGS_DIR}/* ${RUNNER_ASSET_DIR}
 
       - name: Archive Infra Apply logs
         env:
