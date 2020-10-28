@@ -37,7 +37,7 @@ scriptName=$(basename $(test -L "$0" && readlink "$0" || echo "$0"));
         echo "loop counter: $i"
         sleep 5s
         # artificial error:
-        # if [ $i -eq 8 ]; then echo ">>> ERROR - 1 - $scriptName - ARTIFICIAL ERROR"; exit 1; fi
+        if [ $i -eq 8 ]; then echo ">>> ERROR - 1 - $scriptName - ARTIFICIAL ERROR"; exit 1; fi
     done
     
     code=$?; if [[ $code != 0 ]]; then echo ">>> ERROR - $code - $scriptName - executing terraform"; exit 1; fi
