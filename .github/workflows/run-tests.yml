@@ -184,18 +184,31 @@ jobs:
           mkdir -p ./${RUNNER_ASSET_DIR}
           sftp -p ${SSH_USER}:${REPO_LOGS_DIR}/* ${RUNNER_ASSET_DIR}
 
+      - name: Check Runner Directory
+        env:
+          RUNNER_ASSET_DIR: ./${{ env.TEST_RUNNER_ASSETS_DIR }}/${{ env.TEST_RUNNER_ASSETS_INFRA_DIR }}/${{ env.TEST_REPO_INFRA_LOGS_DIR }}
+        run: |
+          echo "where am i and what is here"
+          pwd
+          ls -la
+          echo "what is in the runner asset dir?"
+          echo "RUNNER_ASSET_DIR=${RUNNER_ASSET_DIR}"
+          ls -la ${RUNNER_ASSET_DIR}
+
+
       - name: Archive Infra Apply logs
         env:
           RUNNER_ASSET_DIR: ./${{ env.TEST_RUNNER_ASSETS_DIR }}/${{ env.TEST_RUNNER_ASSETS_INFRA_DIR }}/${{ env.TEST_REPO_INFRA_LOGS_DIR }}
         uses: actions/upload-artifact@v2
         with:
           name: infra-apply-logs
-          path: ${RUNNER_ASSET_DIR}
+          path: ${RUNNER_ASSET_DIR}/
+          if-no-files-found: error
             
       # - name: DEBUG - end fail
       #   run: exit 1    
 
-      - name: FAILED
+      - name: Check - Infra Apply - FAILED
         if: ${{ failure() }}
         env:
           JOB_CONTEXT: ${{ toJson(job) }}
@@ -206,8 +219,9 @@ jobs:
 
 
       # start the test runs
-      # download all data
-      # the teardown infra
+      # download test-results
+      # teardown infra
+      # teardown azure controller
 
 ###
 # The End.
