@@ -108,7 +108,7 @@ jobs:
         with:
           subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           resourceGroupName: ${{ env.TEST_CONTROLLER_ID }}-${{ env.TEST_AZURE_PROJECT }}-rg
-          template: ${{ env.AZURE_DEPLOY_ARM_TEMPLATE }}
+          template: ${{ env.TEST_AZURE_DEPLOY_ARM_TEMPLATE }}
           parameters: vm_admin_public_key="${{ secrets.CONTROLLER_VM_PUBLIC_KEY }}" project_prefix=${{ env.TEST_CONTROLLER_ID }}-${{ env.TEST_AZURE_PROJECT }} zone=${{ env.TEST_ZONE }} vm_admin_username=${{ env.TEST_VM_ADMIN_USERNAME }}
       
       - name: DEBUG - end fail
