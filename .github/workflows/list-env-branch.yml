@@ -1,0 +1,39 @@
+# ---------------------------------------------------------------------------------------------
+# MIT License
+# Copyright (c) 2020, Solace Corporation, Ricardo Gomez-Ulmke (ricardo.gomez-ulmke@solace.com)
+# ---------------------------------------------------------------------------------------------
+
+name: List Envs Branch
+on:
+  push:
+    branches:
+      - feature-wf-test-1
+jobs:
+  check_env:
+    runs-on: ubuntu-18.04
+      # TODO: checkout the correct release or branch
+      # copy that to the controller      
+    steps:
+      - name: Dump GitHub context
+        # env:
+        #   GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: |
+          echo "entire 'github' object"  
+          echo ${{ toJson(github) }}
+
+      - name: "TESTS: List Env Vars before checkout"
+        run: |
+          pwd
+          ls -a
+          echo "GITHUB_SHA=$GITHUB_SHA"
+          echo "GITHUB_REPOSITORY=$GITHUB_REPOSITORY"
+          echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE"
+          echo "GITHUB_REF=$GITHUB_REF"
+          echo "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}"
+          echo "github.token=${{ github.token }}"
+      # - name: Checkout Repository
+      #   uses: actions/checkout@master
+
+
+###
+# The End.
