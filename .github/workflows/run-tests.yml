@@ -171,7 +171,7 @@ jobs:
       
 
 
-      - name: Copy Repo to Controller
+      # - name: Copy Repo to Controller
         # recursive from: $GITHUB_WORKSPACE
         # to: ~/$GITHUB_REPOSITORY/$GITHUB_REF
         #    ~/solace-iot-team/solace-ci-controller/refs/heads/feature-wf-test-1
