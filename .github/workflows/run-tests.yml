@@ -45,6 +45,7 @@ env:
   TEST_AZURE_PROJECT: "solace-ctrller"
   TEST_AZURE_DEPLOY_ARM_TEMPLATE: "./azure/.workflows/azure-deploy.json"
   TEST_BOOTSTRAP_SH: "./azure/.workflows/bootstrap.sh"
+  TEST_CONTROLLER_REPO_DIR: ~/${{ env.GITHUB_REPOSITORY }}/${{ env.GITHUB_REF }} 
 
 jobs:
   run_tests:
@@ -161,10 +162,22 @@ jobs:
       - name: Controller - Create Repo Directory
         run: |
           ssh controller "\
-              export REPO_DIR=~/$GITHUB_REPOSITORY/$GITHUB_REF
-              rm -rf $REPO_DIR && \
-              mkdir -p $REPO_DIR
+              rm -rf "${TEST_CONTROLLER_REPO_DIR}" && \
+              mkdir -p "${TEST_CONTROLLER_REPO_DIR}"
           "
+
+      - name: Copy Repo to Controller
+        # https://github.com/garygrossgarten/github-action-scp
+        uses: garygrossgarten/github-action-scp@release
+        with:
+          local: ${{ env.GITHUB_WORKSPACE }}
+          remote: ${{ env.TEST_CONTROLLER_REPO_DIR }}
+          recursive: true
+          verbose: true
+          host: ${{ steps.azure_deploy.outputs.publicIPAddress }}
+          username: ${{ env.TEST_VM_ADMIN_USERNAME }}
+          privateKey: ${{ secrets.CONTROLLER_VM_PRIVATE_KEY }}
+
 
       - name: DEBUG - end fail
         run: exit 1    
