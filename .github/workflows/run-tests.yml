@@ -13,29 +13,6 @@ on:
     branches:
       - master  
   # TODO: also run tests on new release
-# on:
-#   workflow_dispatch:
-#     inputs:
-#       controller_id:
-#           description: "unique controller id"
-#           required: true
-#           default: w1
-#       azure_location:
-#           description: "azure location / region"
-#           required: true
-#           default: "westeurope"
-#       zone:
-#           description: "azure availability zone"
-#           required: true
-#           default: "1"
-#       vm_admin_username:
-#           description: "vm admin username"
-#           required: true
-#           default: "controller"
-#       release_tag:
-#           description: "release tag number to test, ex. 'v'"
-#           required: true
-#           default: "0.0.5"
 env:
 
   TEST_CONTROLLER_ID: "wft-azperf"
@@ -45,6 +22,13 @@ env:
   TEST_AZURE_PROJECT: "solace-ctrller"
   TEST_AZURE_DEPLOY_ARM_TEMPLATE: "./azure/.workflows/azure-deploy.json"
   TEST_BOOTSTRAP_SH: "./azure/.workflows/bootstrap.sh"
+  TEST_REMOTE_ASSETS_DIR: ~/remote-assets
+  TEST_REMOTE_ASSETS_INFRA_DIR: infra
+  TEST_CONTROLLER_REPO_DIR: ~/${{ github.repository }}/${{ github.ref }} 
+  TEST_REPO_INFRA_DIR: azure/.test/infra
+  TEST_REPO_INFRA_LOGS_DIR: logs
+  TEST_REPO_INFRA_APPLY_SCRIPT: run.apply.fg.sh
+  TEST_REPO_INFRA_DESTROY_SCRIPT: run.destroy.fg.sh
 
 jobs:
   run_tests:
@@ -159,21 +143,13 @@ jobs:
       #     echo "${{toJson(steps.azure_deploy.outputs)}}"
 
 
-#           {github.repository} = solace-iot-team/solace-ci-controller
+#     {github.repository} = solace-iot-team/solace-ci-controller
 #     {github.ref} = refs/heads/feature-wf-test-1
 #     {github.event.repository.name}=solace-ci-controller
 #     {github.event.repository.master_branch} = main
 
-# mkdir -p solace-iot-team/solace-ci-controller
-# cd solace-iot-team/solace-ci-controller
-# git init
-# git remote add origin https://github.com/solace-iot-team/solace-ci-controller.git
-# git fetch origin d43e320b0c76e55c07e13e9c062ed1a478ff68c6
-# git reset --hard FETCH_HEAD
-
       - name: Controller - Get Repo Ref
         env:
-          TEST_CONTROLLER_REPO_DIR: ~/${{ github.repository }}/${{ github.ref }} 
           CLONE_URL: ${{ github.event.repository.clone_url }}
         run: |
           ssh controller "\
@@ -186,71 +162,50 @@ jobs:
               git reset --hard FETCH_HEAD
           "
 
-      - name: DEBUG - end fail
-        run: exit 1    
-        
-      - name: Copy Repo to Controller
-        # https://github.com/garygrossgarten/github-action-scp
-        # creates target folder automatically
-        uses: garygrossgarten/github-action-scp@release
-        with:
-          local: "./"
-          remote: ${{ env.TEST_CONTROLLER_REPO_DIR }}
-          recursive: true
-          verbose: true
-          host: ${{ steps.azure_deploy.outputs.publicIPAddress }}
-          username: ${{ env.TEST_VM_ADMIN_USERNAME }}
-          privateKey: ${{ secrets.CONTROLLER_VM_PRIVATE_KEY }}
-
-
-      
-
-
-      # - name: Copy Repo to Controller
-        # recursive from: $GITHUB_WORKSPACE
-        # to: ~/$GITHUB_REPOSITORY/$GITHUB_REF
-        #    ~/solace-iot-team/solace-ci-controller/refs/heads/feature-wf-test-1
-        #  do I need to mkdir this first?
-
-      - name: Controller - Get Release
-        env:
-          REPO_NAME: solace-ci-controller
-        run: |
-          ssh controller "\
-              rm -rf ~/release && \
-              mkdir -p ~/release && \
-              cd ~/release && \
-              curl -L https://github.com/solace-iot-team/${REPO_NAME}/archive/v${{ github.event.inputs.release_tag }}.zip --output release.${{ github.event.inputs.release_tag }}.zip  && \
-              unzip release.${{ github.event.inputs.release_tag }}.zip    
-          "
-
       - name: TODO - Controller - Bootstrap Tests
         run: |
-          echo "run a script which does all the prep, like keys, download solace, etc."
+          echo "run a script which does all the prep, like keys, link solace, etc."
 
-      - name: Controller - Run Infra Setup
-        env:
-          REPO_NAME: solace-ci-controller
+      - name: Controller - Run Infra Apply
         run: |
           ssh controller "\
-              cd ~/release/${REPO_NAME}-* && \
-              cd azure/.test/infra && \
-              ./run.apply.fg.sh
+              cd "${TEST_CONTROLLER_REPO_DIR}/${TEST_REPO_INFRA_DIR}" && \
+              ./${TEST_REPO_INFRA_APPLY_SCRIPT}
           "
-      # TODO:
-      # don't fail but check exit code
-      # if not ok: pull down all the log files
-      # set artefacts 
-      # exit the workflow: run: exit 1
-
-      - name: Controller - ERROR - Infra Setup - Download Logs 
+        continue-on-error: true
+        # timeout-minutes: 120
+  
+      - name: Controller - Infra Apply - Download Logs 
         env:
-          REPO_NAME: solace-ci-controller
+          SSH_USER: ${{ env.TEST_VM_ADMIN_USERNAME }}
+          REPO_LOGS_DIR: ${{ env.TEST_CONTROLLER_REPO_DIR }}/${{ TEST_REPO_INFRA_DIR }}/${{ TEST_REPO_INFRA_LOGS_DIR }}
+          RUNNER_ASSET_DIR: ./${TEST_REMOTE_ASSETS_DIR}/${TEST_REMOTE_ASSETS_INFRA_DIR}/${{ TEST_REPO_INFRA_LOGS_DIR }}
         run: |
-          rm -rf ./remote-logs 
-          mkdir -p ./remote-logs
-          sftp -p controller:release/solace-ci-controller-${{ github.event.inputs.release_tag }}/azure/.test/infra/logs/* ./remote-logs
-      
+          rm -rf ./${TEST_REMOTE_ASSETS_DIR}
+          mkdir -p ./${TEST_REMOTE_ASSETS_DIR}/${TEST_REMOTE_ASSETS_INFRA_DIR}
+          sftp -p ${SSH_USER}:${REPO_LOGS_DIR}/* ${LOCAL_ASSET_DIR}
+
+      - name: Archive Infra Apply logs
+        env:
+          RUNNER_ASSET_DIR: ./${TEST_REMOTE_ASSETS_DIR}/${TEST_REMOTE_ASSETS_INFRA_DIR}/${{ TEST_REPO_INFRA_LOGS_DIR }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: infra-apply-logs
+          path: ${RUNNER_ASSET_DIR}
+            
+      # - name: DEBUG - end fail
+      #   run: exit 1    
+
+      - name: FAILED
+        if: ${{ failure() }}
+        env:
+          JOB_CONTEXT: ${{ toJson(job) }}
+        run: |
+          echo "TEST FAILED"
+          echo "$JOB_CONTEXT"
+          exit 1
+
+
       # start the test runs
       # download all data
       # the teardown infra
