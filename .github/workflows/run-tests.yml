@@ -210,8 +210,13 @@ jobs:
           WORKFLOW: ${{ github.workflow }}
           JOB: ${{ github.job }}
           EVENT_NAME: ${{ github.event_name }}
+          VIEW_URL: ${{ github.event.repository.html_url }}/actions/runs/${{ github.run_id }}
         with:
           filename: .github/failed-test-template.md
+
+      # - name: 
+  # https://docs.github.com/en/free-pro-team@latest/actions/managing-workflow-runs/adding-a-workflow-status-badge#using-the-event-parameter
+
 
       # start the test runs
       # download test-results
@@ -221,3 +226,4 @@ jobs:
 
 ###
 # The End.
+
