@@ -19,7 +19,7 @@ jobs:
         #   GITHUB_CONTEXT: ${{ toJson(github) }}
         run: |
           echo "entire 'github' object"  
-          echo ${{ toJson(github) }}
+          echo "${{ toJson(github) }}"
 
       - name: "TESTS: List Env Vars before checkout"
         run: |
