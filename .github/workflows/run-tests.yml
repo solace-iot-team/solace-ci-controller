@@ -178,8 +178,8 @@ jobs:
       - name: Controller - Infra Apply - Download Logs 
         env:
           SSH_USER: ${{ env.TEST_VM_ADMIN_USERNAME }}
-          REPO_LOGS_DIR: ${{ env.TEST_CONTROLLER_REPO_DIR }}/${{ TEST_REPO_INFRA_DIR }}/${{ TEST_REPO_INFRA_LOGS_DIR }}
-          RUNNER_ASSET_DIR: ./${TEST_REMOTE_ASSETS_DIR}/${TEST_REMOTE_ASSETS_INFRA_DIR}/${{ TEST_REPO_INFRA_LOGS_DIR }}
+          REPO_LOGS_DIR: ${{ env.TEST_CONTROLLER_REPO_DIR }}/${{ env.TEST_REPO_INFRA_DIR }}/${{ env.TEST_REPO_INFRA_LOGS_DIR }}
+          RUNNER_ASSET_DIR: ./${{ env.TEST_REMOTE_ASSETS_DIR }}/${{ env.TEST_REMOTE_ASSETS_INFRA_DIR }}/${{ env.TEST_REPO_INFRA_LOGS_DIR }}
         run: |
           rm -rf ./${TEST_REMOTE_ASSETS_DIR}
           mkdir -p ./${TEST_REMOTE_ASSETS_DIR}/${TEST_REMOTE_ASSETS_INFRA_DIR}
@@ -187,7 +187,7 @@ jobs:
 
       - name: Archive Infra Apply logs
         env:
-          RUNNER_ASSET_DIR: ./${TEST_REMOTE_ASSETS_DIR}/${TEST_REMOTE_ASSETS_INFRA_DIR}/${{ TEST_REPO_INFRA_LOGS_DIR }}
+          RUNNER_ASSET_DIR: ./${{ env.TEST_REMOTE_ASSETS_DIR }}/${{ env.TEST_REMOTE_ASSETS_INFRA_DIR }}/${{ env.TEST_REPO_INFRA_LOGS_DIR }}
         uses: actions/upload-artifact@v2
         with:
           name: infra-apply-logs
