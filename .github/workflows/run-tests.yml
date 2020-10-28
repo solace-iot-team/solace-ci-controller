@@ -206,14 +206,13 @@ jobs:
           path: ${{ env.RUNNER_ASSET_DIR }}
           if-no-files-found: error
 
-      # - name: Check - Infra Apply - FAILED
-      #   if: ${{ failure() }}
-      #   env:
-      #     JOB_CONTEXT: ${{ toJson(job) }}
-      #   run: |
-      #     echo "Infra Apply - FAILED"
-      #     echo "$JOB_CONTEXT"
-      #     exit 1
+      - name: Check - Infra Apply - FAILED
+        if: ${{ failure() }}
+        env:
+          JOB_CONTEXT: ${{ toJson(job) }}
+        run: |
+          echo "Infra Apply - FAILED"
+          echo "$JOB_CONTEXT"
 
 
       # start the test runs
