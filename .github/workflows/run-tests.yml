@@ -45,7 +45,6 @@ env:
   TEST_AZURE_PROJECT: "solace-ctrller"
   TEST_AZURE_DEPLOY_ARM_TEMPLATE: "./azure/.workflows/azure-deploy.json"
   TEST_BOOTSTRAP_SH: "./azure/.workflows/bootstrap.sh"
-  TEST_CONTROLLER_REPO_DIR: ~/${{ github.repository }}/${{ github.ref }} 
 
 jobs:
   run_tests:
@@ -159,15 +158,40 @@ jobs:
       #   run: |
       #     echo "${{toJson(steps.azure_deploy.outputs)}}"
 
-      - name: Controller - Create Repo Directory
+
+#           {github.repository} = solace-iot-team/solace-ci-controller
+#     {github.ref} = refs/heads/feature-wf-test-1
+#     {github.event.repository.name}=solace-ci-controller
+#     {github.event.repository.master_branch} = main
+
+# mkdir -p solace-iot-team/solace-ci-controller
+# cd solace-iot-team/solace-ci-controller
+# git init
+# git remote add origin https://github.com/solace-iot-team/solace-ci-controller.git
+# git fetch origin d43e320b0c76e55c07e13e9c062ed1a478ff68c6
+# git reset --hard FETCH_HEAD
+
+      - name: Controller - Get Repo Ref
+        env:
+          TEST_CONTROLLER_REPO_DIR: ~/${{ github.repository }}/${{ github.ref }} 
+          CLONE_URL: ${{ github.event.repository.clone_url }}
         run: |
           ssh controller "\
               rm -rf "${TEST_CONTROLLER_REPO_DIR}" && \
-              mkdir -p "${TEST_CONTROLLER_REPO_DIR}"
+              mkdir -p "${TEST_CONTROLLER_REPO_DIR}" && \
+              cd "${TEST_CONTROLLER_REPO_DIR}" && \
+              git init && \
+              git remote add origin "${CLONE_URL}" && \
+              git fetch origin "${GITHUB_SHA}" && \
+              git reset --hard FETCH_HEAD
           "
 
+      - name: DEBUG - end fail
+        run: exit 1    
+        
       - name: Copy Repo to Controller
         # https://github.com/garygrossgarten/github-action-scp
+        # creates target folder automatically
         uses: garygrossgarten/github-action-scp@release
         with:
           local: "./"
@@ -179,8 +203,6 @@ jobs:
           privateKey: ${{ secrets.CONTROLLER_VM_PRIVATE_KEY }}
 
 
-      - name: DEBUG - end fail
-        run: exit 1    
       
 
 
