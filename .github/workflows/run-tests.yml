@@ -3,7 +3,7 @@
 # Copyright (c) 2020, Solace Corporation, Ricardo Gomez-Ulmke (ricardo.gomez-ulmke@solace.com)
 # ---------------------------------------------------------------------------------------------
 
-name: Run Tests
+name: Run Tests - new 
 on:
   workflow_dispatch:
     inputs:
