@@ -34,14 +34,13 @@
         }
     },
     "variables": {
-        "projectPrefix": "[concat(parameters('controller_id'), '-sol-ci-ctrller')]",
-        "networkSecurityGroups_controller_SecGroupNet_name": "[concat(variables('projectPrefix'), '-SecGroupNet')]",
-        "publicIPAddresses_controller_vmPublicIP_name": "[concat(variables('projectPrefix'), '-vmPublicIP')]",
-        "virtualNetworks_controller_vNet_name": "[concat(variables('projectPrefix'), '-vNet')]",
-        "virtualNetworks_controller_vNet_subNet_name": "[concat(variables('projectPrefix'), '-vNet-subNet')]",
-        "virtualMachines_controller_vm_name": "[concat(variables('projectPrefix'), '-vm')]",
-        "networkInterfaces_controller_vmNetInt_name": "[concat(variables('projectPrefix'), '-vmNetInt')]",
-        "disks_controller_vm_os_disk_name": "[concat(variables('projectPrefix'), '-vmOsDisk')]"
+        "networkSecurityGroups_controller_SecGroupNet_name": "[concat(parameters('project_prefix'), '-SecGroupNet')]",
+        "publicIPAddresses_controller_vmPublicIP_name": "[concat(parameters('project_prefix'), '-vmPublicIP')]",
+        "virtualNetworks_controller_vNet_name": "[concat(parameters('project_prefix'), '-vNet')]",
+        "virtualNetworks_controller_vNet_subNet_name": "[concat(parameters('project_prefix'), '-vNet-subNet')]",
+        "virtualMachines_controller_vm_name": "[concat(parameters('project_prefix'), '-vm')]",
+        "networkInterfaces_controller_vmNetInt_name": "[concat(parameters('project_prefix'), '-vmNetInt')]",
+        "disks_controller_vm_os_disk_name": "[concat(parameters('project_prefix'), '-vmOsDisk')]"
     },
     "resources": [
         {
