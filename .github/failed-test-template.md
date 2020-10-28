@@ -11,10 +11,10 @@ Tests failed.
 
 - who dunnit: {{ payload.sender.login }}
 - when: {{ date | date('dddd, MMMM Do YYYY, HH:mm:ss') }}
-- ref: {{ github.ref }}
 - ref: {{ env.REF }}
-- workflow: {{ tools.context.workflow }}
-- repo: {{ tools.context.repo }}
+- workflow: {{ env.WORKFLOW }}
+- job: {{ env.JOB }}
+- event_name: {{ env.EVENT_NAME }}
 
 
 ---
