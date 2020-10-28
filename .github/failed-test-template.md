@@ -10,8 +10,9 @@ labels: bug
 Tests failed.
 
 - who dunnit: {{ payload.sender.login }}
-- when: {{ date | date('dddd, MMMM Do') }}
-- ref: {{ tools.context.ref }}
+- when: {{ date | date('dddd, MMMM Do YYYY, HH:mm:ss') }}
+- ref: {{ github.ref }}
+- ref: {{ env.REF }}
 - workflow: {{ tools.context.workflow }}
 - repo: {{ tools.context.repo }}
 
