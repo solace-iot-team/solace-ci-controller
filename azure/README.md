@@ -3,7 +3,7 @@
 > :warning: **UNDER CONSTRUCTION**
 
 ## GitHub Secrets
-
+ 
 ### Credentials
 
 [Generate the Service Principal](https://docs.microsoft.com/en-gb/cli/azure/ad/sp?view=azure-cli-latest#az_ad_sp_create_for_rbac).
@@ -55,7 +55,7 @@ ls ./state/*.json
 cat ./state/loginSSH.sh
 ````
 
-### Configure VM 
+### Configure VM
 _**Note: these instructions are based on Ubuntu.**_
 
 #### Login
@@ -193,5 +193,3 @@ Actions -> Standup Azure Controller.
 
 ---
 The End.
-
-
